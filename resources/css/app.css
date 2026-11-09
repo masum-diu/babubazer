@@ -8,4 +8,64 @@
         'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
         'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
         'Noto Color Emoji';
+    --font-display: 'Fredoka', 'Instrument Sans', ui-sans-serif, system-ui,
+        sans-serif;
+
+    --color-ink: #12323a;
+    --color-ink-soft: #3d5a63;
+    --color-mist: #f3fbf9;
+    --color-foam: #e4f4ef;
+    --color-leaf: #1f8a70;
+    --color-leaf-deep: #146353;
+    --color-coral: #ff6b57;
+    --color-coral-deep: #e8513d;
+    --color-sun: #ffc857;
+    --color-line: #cfe6df;
+}
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        @apply bg-mist text-ink antialiased;
+        background-image:
+            radial-gradient(
+                circle at 12% 10%,
+                rgba(255, 200, 87, 0.18),
+                transparent 28%
+            ),
+            radial-gradient(
+                circle at 88% 0%,
+                rgba(31, 138, 112, 0.12),
+                transparent 32%
+            ),
+            linear-gradient(180deg, #f7fcfa 0%, #eef8f4 48%, #f3fbf9 100%);
+        min-height: 100vh;
+    }
+
+    ::selection {
+        background: rgba(31, 138, 112, 0.22);
+    }
+}
+
+@utility font-display {
+    font-family: var(--font-display);
+}
+
+@media print {
+    @page {
+        margin: 12mm;
+    }
+
+    body {
+        background: #fff !important;
+        background-image: none !important;
+        color: #12323a !important;
+    }
+
+    .print-sheet {
+        break-inside: avoid;
+    }
 }
