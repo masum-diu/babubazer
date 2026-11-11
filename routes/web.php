@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\SalesReportController;
 use App\Http\Controllers\Admin\SitePageController as AdminSitePageController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
@@ -86,6 +87,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
     Route::patch('/orders/{order}', [AdminOrderController::class, 'update'])->name('orders.update');
+    Route::get('/reports/sales/export', [SalesReportController::class, 'export'])->name('reports.sales.export');
+    Route::get('/reports/sales', [SalesReportController::class, 'index'])->name('reports.sales');
 
     Route::get('/pages', [AdminSitePageController::class, 'edit'])->name('pages.edit');
     Route::put('/pages/{page}', [AdminSitePageController::class, 'update'])->name('pages.update');

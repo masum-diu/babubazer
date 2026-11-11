@@ -1,6 +1,7 @@
 import { Link, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
+    ChartColumn,
     FileSpreadsheet,
     FileText,
     FolderTree,
@@ -66,6 +67,12 @@ const links = [
         label: 'Sales',
         hint: 'Orders',
         icon: ShoppingBag,
+    },
+    {
+        href: '/admin/reports/sales',
+        label: 'Sales report',
+        hint: 'Report',
+        icon: ChartColumn,
     },
     {
         href: '/admin/pages',
