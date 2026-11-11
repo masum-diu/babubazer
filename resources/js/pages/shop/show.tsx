@@ -30,6 +30,7 @@ type ProductVariant = {
 type Product = ProductCardData & {
     description?: string | null;
     stock: number;
+    gallery?: string[] | null;
     colors?: ProductColor[];
     sizes?: ProductSize[];
     variants?: ProductVariant[];
@@ -55,14 +56,32 @@ export default function ProductShow({
     const selectedColor = colors.find((color) => color.id === colorId) || null;
 
     const gallery = useMemo(() => {
-        if (selectedColor?.images?.length) {
-            return selectedColor.images.map((image) => image.path);
-        }
-        if (product.image) {
-            return [product.image];
-        }
-        return [];
-    }, [selectedColor, product.image]);
+        const colorImages =
+            selectedColor?.images?.map((image) => image.path) || [];
+        return [
+            ...new Set(
+                [
+                    ...colorImages,
+                    ...(product.gallery || []),
+                    product.image,
+                ].filter((image): image is string => Boolean(image)),
+            ),
+        ];
+    }, [selectedColor, product.gallery, product.image]);
+
+    const showPreviousImage = () => {
+        setActiveImage((current) =>
+            gallery.length
+                ? (current - 1 + gallery.length) % gallery.length
+                : 0,
+        );
+    };
+
+    const showNextImage = () => {
+        setActiveImage((current) =>
+            gallery.length ? (current + 1) % gallery.length : 0,
+        );
+    };
 
     const selectedVariant = useMemo(() => {
         return (
@@ -142,26 +161,49 @@ export default function ProductShow({
                             </>
                         )}
                         <span>/</span>
-                        <span className="truncate text-ink">{product.name}</span>
+                        <span className="truncate text-ink">
+                            {product.name}
+                        </span>
                     </div>
                 </div>
 
-                <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14 lg:py-12 sm:px-6 lg:px-8">
+                <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-8 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14 lg:px-8 lg:py-12">
                     <div className="space-y-4">
-                        <div className="group relative overflow-hidden rounded-[2rem] bg-white shadow-[0_30px_70px_-42px_rgba(18,50,58,0.5)] ring-1 ring-line/60">
+                        <div className="group relative overflow-hidden rounded-2xl bg-white ring-1 ring-line/60">
                             {gallery[activeImage] ? (
                                 <img
                                     key={gallery[activeImage]}
                                     src={gallery[activeImage]}
                                     alt={product.name}
-                                    className="aspect-[5/6] w-full object-cover transition duration-700 ease-out group-hover:scale-[1.02] sm:aspect-square"
+                                    className="aspect-square w-full object-cover"
                                 />
                             ) : (
-                                <div className="aspect-[5/6] bg-gradient-to-br from-foam via-white to-leaf/15 sm:aspect-square" />
+                                <div className="aspect-square bg-gradient-to-br from-foam via-white to-leaf/15" />
+                            )}
+
+                            {gallery.length > 0 && (
+                                <>
+                                    <button
+                                        type="button"
+                                        onClick={showPreviousImage}
+                                        aria-label="Previous product image"
+                                        className="absolute top-1/2 left-3 inline-flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-leaf-deep shadow-sm backdrop-blur transition hover:bg-white"
+                                    >
+                                        <ArrowLeft className="size-5" />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={showNextImage}
+                                        aria-label="Next product image"
+                                        className="absolute top-1/2 right-3 inline-flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-leaf-deep shadow-sm backdrop-blur transition hover:bg-white"
+                                    >
+                                        <ArrowRight className="size-5" />
+                                    </button>
+                                </>
                             )}
 
                             {onSale && discountPercent > 0 && (
-                                <span className="absolute top-5 left-5 rounded-full bg-coral px-4 py-1.5 text-sm font-semibold text-white shadow-lg shadow-coral/30">
+                                <span className="absolute top-4 left-4 rounded-full bg-coral px-3 py-1 text-xs font-semibold text-white">
                                     -{discountPercent}%
                                 </span>
                             )}
@@ -174,22 +216,24 @@ export default function ProductShow({
                         </div>
 
                         {gallery.length > 1 && (
-                            <div className="grid grid-cols-4 gap-2.5 sm:grid-cols-5">
+                            <div className="flex gap-2.5 overflow-x-auto">
                                 {gallery.map((src, index) => (
                                     <button
                                         key={`${src}-${index}`}
                                         type="button"
                                         onClick={() => setActiveImage(index)}
-                                        className={`overflow-hidden rounded-2xl transition duration-300 ${
+                                        aria-label={`Show product image ${index + 1}`}
+                                        aria-current={activeImage === index}
+                                        className={`size-16 shrink-0 overflow-hidden rounded-lg transition ${
                                             activeImage === index
-                                                ? 'ring-2 ring-leaf ring-offset-2 ring-offset-mist'
+                                                ? 'ring-2 ring-leaf'
                                                 : 'opacity-75 ring-1 ring-line hover:opacity-100'
                                         }`}
                                     >
                                         <img
                                             src={src}
                                             alt=""
-                                            className="aspect-square w-full object-cover"
+                                            className="size-full object-cover"
                                         />
                                     </button>
                                 ))}
@@ -208,7 +252,7 @@ export default function ProductShow({
                                             .join(' · ')}
                                     </p>
                                 )}
-                                <h1 className="font-display mt-3 text-4xl leading-tight text-ink sm:text-5xl">
+                                <h1 className="mt-3 font-display text-4xl leading-tight text-ink sm:text-5xl">
                                     {product.name}
                                 </h1>
                                 {product.category && (
@@ -376,7 +420,7 @@ export default function ProductShow({
                                             availableStock < 1 ||
                                             form.processing
                                         }
-                                        className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-coral px-7 py-3.5 text-sm font-semibold text-white shadow-[0_16px_30px_-16px_rgba(255,107,87,0.8)] transition hover:bg-coral-deep disabled:opacity-40 sm:flex-none sm:min-w-48"
+                                        className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-coral px-7 py-3.5 text-sm font-semibold text-white shadow-[0_16px_30px_-16px_rgba(255,107,87,0.8)] transition hover:bg-coral-deep disabled:opacity-40 sm:min-w-48 sm:flex-none"
                                     >
                                         <ShoppingBag className="h-4 w-4" />
                                         Add to bag
@@ -404,7 +448,7 @@ export default function ProductShow({
                                 <p className="text-xs tracking-[0.18em] text-leaf uppercase">
                                     You may also like
                                 </p>
-                                <h2 className="font-display mt-2 text-3xl text-ink sm:text-4xl">
+                                <h2 className="mt-2 font-display text-3xl text-ink sm:text-4xl">
                                     More from this category
                                 </h2>
                             </div>

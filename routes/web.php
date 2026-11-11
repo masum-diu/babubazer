@@ -4,8 +4,10 @@ use App\Http\Controllers\AboutController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin\AttributeColorController as AdminColorController;
 use App\Http\Controllers\Admin\AttributeSizeController as AdminSizeController;
+use App\Http\Controllers\Admin\BulkProductController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\SitePageController as AdminSitePageController;
@@ -53,7 +55,13 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
 
+    Route::get('/media', [MediaController::class, 'index'])->name('media.index');
+    Route::post('/media', [MediaController::class, 'store'])->name('media.store');
+    Route::get('/products/import', [BulkProductController::class, 'index'])->name('products.import');
+    Route::get('/products/import/template', [BulkProductController::class, 'template'])->name('products.import.template');
+    Route::post('/products/import', [BulkProductController::class, 'upload'])->name('products.import.upload');
     Route::get('/products', [AdminProductController::class, 'index'])->name('products.index');
+    Route::delete('/products', [AdminProductController::class, 'destroyAll'])->name('products.destroy-all');
     Route::get('/products/create', [AdminProductController::class, 'create'])->name('products.create');
     Route::post('/products', [AdminProductController::class, 'store'])->name('products.store');
     Route::get('/products/{product}/edit', [AdminProductController::class, 'edit'])->name('products.edit');

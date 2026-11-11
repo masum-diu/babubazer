@@ -12,7 +12,7 @@ class ImageUpload
     {
         $path = $file->store($folder, 'public');
 
-        return Storage::disk('public')->url($path);
+        return url('/storage/'.$path);
     }
 
     public static function delete(?string $url): void

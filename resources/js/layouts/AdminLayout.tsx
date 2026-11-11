@@ -1,8 +1,10 @@
 import { Link, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
+    FileSpreadsheet,
     FileText,
     FolderTree,
+    Images,
     LayoutDashboard,
     LogOut,
     Menu,
@@ -28,6 +30,18 @@ const links = [
         label: 'Catalog',
         hint: 'Items',
         icon: Package,
+    },
+    {
+        href: '/admin/products/import',
+        label: 'Bulk upload',
+        hint: 'CSV',
+        icon: FileSpreadsheet,
+    },
+    {
+        href: '/admin/media',
+        label: 'Media library',
+        hint: 'Images',
+        icon: Images,
     },
     {
         href: '/admin/categories',
@@ -64,6 +78,13 @@ const links = [
 function isActive(pathname: string, href: string) {
     if (href === '/admin/dashboard') {
         return pathname === href;
+    }
+    if (href === '/admin/products') {
+        return (
+            pathname === href ||
+            (pathname.startsWith(`${href}/`) &&
+                !pathname.startsWith(`${href}/import`))
+        );
     }
     return pathname === href || pathname.startsWith(`${href}/`);
 }
@@ -140,7 +161,7 @@ export default function AdminLayout({
                             }
                         }}
                     >
-                        <span className="font-display block text-xl leading-none text-white">
+                        <span className="block font-display text-xl leading-none text-white">
                             {name}
                         </span>
                         <span className="mt-1 block text-[11px] tracking-[0.18em] text-white/45 uppercase">
@@ -202,7 +223,7 @@ export default function AdminLayout({
                                 <p className="text-[11px] tracking-[0.2em] text-leaf uppercase">
                                     Admin
                                 </p>
-                                <h1 className="font-display truncate text-2xl text-white sm:text-3xl">
+                                <h1 className="truncate font-display text-2xl text-white sm:text-3xl">
                                     {title}
                                 </h1>
                             </div>
@@ -228,7 +249,9 @@ export default function AdminLayout({
 
                         {menuOpen && (
                             <div className="mt-4 rounded-2xl border border-white/10 bg-ink/90 p-3 lg:hidden">
-                                <NavLinks onNavigate={() => setMenuOpen(false)} />
+                                <NavLinks
+                                    onNavigate={() => setMenuOpen(false)}
+                                />
                                 <div className="mt-3 space-y-1 border-t border-white/10 pt-3">
                                     <Link
                                         href="/"

@@ -23,8 +23,41 @@ class ProductController extends Controller
             'products' => Product::query()
                 ->with('category:id,name')
                 ->latest()
-                ->paginate(15),
+                ->paginate(15)
+                ->withQueryString(),
         ]);
+    }
+
+    public function destroyAll(): RedirectResponse
+    {
+        $deleted = 0;
+        $uploadedImages = [];
+
+        Product::query()
+            ->with('colors.images')
+            ->chunkById(100, function ($products) use (&$deleted, &$uploadedImages): void {
+                foreach ($products as $product) {
+                    $uploadedImages[] = $product->image;
+                    foreach ($product->colors as $color) {
+                        foreach ($color->images as $image) {
+                            $uploadedImages[] = $image->path;
+                        }
+                    }
+
+                    $product->delete();
+                    $deleted++;
+                }
+            });
+
+        foreach (array_unique(array_filter($uploadedImages)) as $image) {
+            $path = ImageUpload::relativePath($image);
+            if ($path && str_starts_with($path, 'products/')) {
+                ImageUpload::delete($image);
+            }
+        }
+
+        return redirect()->route('admin.products.index')
+            ->with('success', "{$deleted} products deleted.");
     }
 
     public function create(): Response
@@ -199,6 +232,7 @@ class ProductController extends Controller
                     'name' => $parent->name,
                     'group' => $parent->name,
                 ];
+
                 continue;
             }
 
