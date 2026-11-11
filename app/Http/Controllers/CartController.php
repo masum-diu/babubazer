@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Services\CartService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -39,21 +40,31 @@ class CartController extends Controller
         $hasSizes = $product->sizes->isNotEmpty();
 
         if ($hasColors) {
-            abort_unless(! empty($data['product_color_id']), 422, 'Please select a color');
-            abort_unless(
-                $product->colors->contains('id', (int) $data['product_color_id']),
-                422,
-                'Invalid color',
-            );
+            if (empty($data['product_color_id'])) {
+                throw ValidationException::withMessages([
+                    'product_color_id' => 'Please select a color.',
+                ]);
+            }
+
+            if (! $product->colors->contains('id', (int) $data['product_color_id'])) {
+                throw ValidationException::withMessages([
+                    'product_color_id' => 'Please select a valid color.',
+                ]);
+            }
         }
 
         if ($hasSizes) {
-            abort_unless(! empty($data['product_size_id']), 422, 'Please select a size');
-            abort_unless(
-                $product->sizes->contains('id', (int) $data['product_size_id']),
-                422,
-                'Invalid size',
-            );
+            if (empty($data['product_size_id'])) {
+                throw ValidationException::withMessages([
+                    'product_size_id' => 'Please select a size.',
+                ]);
+            }
+
+            if (! $product->sizes->contains('id', (int) $data['product_size_id'])) {
+                throw ValidationException::withMessages([
+                    'product_size_id' => 'Please select a valid size.',
+                ]);
+            }
         }
 
         $this->cart->add(

@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import { Banknote, ShieldCheck, Truck } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { ProductCard, type ProductCardData } from '@/components/ProductCard';
 import StoreLayout from '@/layouts/StoreLayout';
 
@@ -20,16 +21,47 @@ type Category = {
 };
 
 type HomeContent = Record<string, string>;
+type BannerSlide = {
+    brand: string;
+    title: string;
+    text: string;
+    image: string;
+    primary: string;
+    primary_url: string;
+    secondary: string;
+    secondary_url: string;
+};
 
 export default function Home({
     content,
     categories,
     featured,
+    bannerSlides,
 }: {
     content: HomeContent;
     categories: Category[];
     featured: ProductCardData[];
+    bannerSlides: BannerSlide[];
 }) {
+    const slides = bannerSlides;
+    const [activeSlide, setActiveSlide] = useState(0);
+
+    useEffect(() => {
+        if (slides.length < 2) {
+            return;
+        }
+
+        const timer = window.setInterval(() => {
+            setActiveSlide((current) => (current + 1) % slides.length);
+        }, 5000);
+
+        return () => window.clearInterval(timer);
+    }, [slides.length]);
+
+    const showSlide = (index: number) => {
+        setActiveSlide((index + slides.length) % slides.length);
+    };
+
     const promises = [1, 2, 3].map((n, index) => ({
         icon: promiseIcons[index],
         accent: promiseAccents[index],
@@ -41,43 +73,88 @@ export default function Home({
         <StoreLayout>
             <Head title="Home" />
 
-            <section className="relative overflow-hidden">
-                <div className="absolute inset-0">
-                    <img
-                        src={content.hero_image}
-                        alt={content.hero_brand || 'BabuBazer'}
-                        className="h-full w-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-r from-ink/85 via-ink/55 to-transparent" />
-                </div>
+            <section
+                className="relative overflow-hidden"
+                aria-label="Featured banners"
+                aria-roledescription="carousel"
+            >
+                {slides.map((slide, index) => (
+                    <div
+                        key={`${slide.title}-${index}`}
+                        className={`absolute inset-0 transition-opacity duration-700 ${
+                            activeSlide === index
+                                ? 'opacity-100'
+                                : 'pointer-events-none opacity-0'
+                        }`}
+                        aria-hidden={activeSlide !== index}
+                    >
+                        <img
+                            src={slide.image}
+                            alt=""
+                            className="h-full w-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-r from-ink/85 via-ink/55 to-transparent" />
+                    </div>
+                ))}
 
-                <div className="relative mx-auto flex min-h-[78vh] max-w-7xl items-end px-4 py-16 sm:px-6 lg:px-8">
+                <div
+                    className="relative mx-auto flex min-h-[78vh] max-w-7xl items-end px-4 py-16 sm:px-6 lg:px-8"
+                    aria-live="polite"
+                >
                     <div className="max-w-xl text-white">
                         <p className="font-display text-5xl leading-none tracking-tight sm:text-6xl md:text-7xl">
-                            {content.hero_brand}
+                            {slides[activeSlide].brand}
                         </p>
                         <h1 className="mt-5 text-2xl leading-snug font-medium sm:text-3xl">
-                            {content.hero_title}
+                            {slides[activeSlide].title}
                         </h1>
                         <p className="mt-4 max-w-md text-base text-white/80">
-                            {content.hero_text}
+                            {slides[activeSlide].text}
                         </p>
                         <div className="mt-8 flex flex-wrap gap-3">
                             <Link
-                                href={content.hero_cta_primary_url || '/shop'}
+                                href={slides[activeSlide].primary_url}
                                 className="rounded-full bg-coral px-6 py-3 text-sm font-semibold text-white transition hover:bg-coral-deep"
                             >
-                                {content.hero_cta_primary}
+                                {slides[activeSlide].primary}
                             </Link>
                             <Link
-                                href={content.hero_cta_secondary_url || '/shop'}
+                                href={slides[activeSlide].secondary_url}
                                 className="rounded-full border border-white/40 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20"
                             >
-                                {content.hero_cta_secondary}
+                                {slides[activeSlide].secondary}
                             </Link>
                         </div>
                     </div>
                 </div>
+
+                {slides.length > 1 && (
+                    <div className="absolute right-4 bottom-6 left-4 z-10 mx-auto flex max-w-7xl justify-center sm:right-6 sm:left-6 lg:right-8 lg:left-8">
+                        <div
+                            className="flex items-center gap-2"
+                            aria-label="Choose banner"
+                        >
+                            {slides.map((slide, index) => (
+                                <button
+                                    key={`${slide.title}-dot`}
+                                    type="button"
+                                    aria-label={`Go to banner ${index + 1}`}
+                                    aria-current={
+                                        activeSlide === index
+                                            ? 'true'
+                                            : undefined
+                                    }
+                                    onClick={() => showSlide(index)}
+                                    className={`h-2.5 rounded-full transition-all ${
+                                        activeSlide === index
+                                            ? 'w-7 bg-white'
+                                            : 'w-2.5 bg-white/55 hover:bg-white/80'
+                                    }`}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                )}
             </section>
 
             <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
@@ -86,7 +163,7 @@ export default function Home({
                         <p className="text-sm tracking-[0.2em] text-leaf uppercase">
                             {content.categories_eyebrow}
                         </p>
-                        <h2 className="font-display mt-2 text-3xl text-ink">
+                        <h2 className="mt-2 font-display text-3xl text-ink">
                             {content.categories_title}
                         </h2>
                     </div>
@@ -131,7 +208,7 @@ export default function Home({
                         <p className="text-sm tracking-[0.2em] text-coral uppercase">
                             {content.featured_eyebrow}
                         </p>
-                        <h2 className="font-display mt-2 text-3xl">
+                        <h2 className="mt-2 font-display text-3xl">
                             {content.featured_title}
                         </h2>
                     </div>
@@ -159,7 +236,7 @@ export default function Home({
                         <p className="text-sm tracking-[0.2em] text-leaf uppercase">
                             {content.promises_eyebrow}
                         </p>
-                        <h2 className="font-display mt-2 text-3xl text-ink">
+                        <h2 className="mt-2 font-display text-3xl text-ink">
                             {content.promises_title}
                         </h2>
                     </div>
@@ -178,7 +255,7 @@ export default function Home({
                                         strokeWidth={1.75}
                                     />
                                 </span>
-                                <p className="font-display mt-5 text-xl leading-snug text-ink">
+                                <p className="mt-5 font-display text-xl leading-snug text-ink">
                                     {item.title}
                                 </p>
                                 <p className="mt-2 text-sm leading-relaxed text-ink-soft">

@@ -13,7 +13,14 @@ class ShopController extends Controller
     public function index(Request $request): Response
     {
         $query = Product::query()
-            ->with(['category:id,name,slug,parent_id', 'category.parent:id,name,slug'])
+            ->with([
+                'category:id,name,slug,parent_id',
+                'category.parent:id,name,slug',
+                'colors:id,product_id,name,hex',
+                'sizes:id,product_id,name',
+                'variants:id,product_id,product_color_id,product_size_id,stock',
+            ])
+            ->withExists(['colors as has_colors', 'sizes as has_sizes'])
             ->where('is_active', true);
 
         if ($search = $request->string('q')->trim()->toString()) {
@@ -96,7 +103,13 @@ class ShopController extends Controller
             ->firstOrFail();
 
         $related = Product::query()
-            ->with('category:id,name,slug')
+            ->with([
+                'category:id,name,slug',
+                'colors:id,product_id,name,hex',
+                'sizes:id,product_id,name',
+                'variants:id,product_id,product_color_id,product_size_id,stock',
+            ])
+            ->withExists(['colors as has_colors', 'sizes as has_sizes'])
             ->where('is_active', true)
             ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)

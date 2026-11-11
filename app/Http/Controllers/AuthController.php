@@ -20,6 +20,15 @@ class AuthController extends Controller
         return Inertia::render('auth/login');
     }
 
+    public function showAdminLogin(Request $request): Response|RedirectResponse
+    {
+        if ($request->user()?->is_admin) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        return Inertia::render('admin/login');
+    }
+
     public function login(Request $request): RedirectResponse
     {
         $credentials = $request->validate([
@@ -33,14 +42,48 @@ class AuthController extends Controller
             ])->onlyInput('email');
         }
 
+        if ($request->user()?->is_admin) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()->withErrors([
+                'email' => 'Admin accounts must sign in through the control room.',
+            ])->onlyInput('email');
+        }
+
         $request->session()->regenerate();
         $this->cart->mergeSessionCart($request);
 
-        $default = $request->user()?->is_admin
-            ? route('admin.dashboard')
-            : route('home');
+        return redirect()->intended(route('home'));
+    }
 
-        return redirect()->intended($default);
+    public function adminLogin(Request $request): RedirectResponse
+    {
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+
+        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+            return back()->withErrors([
+                'email' => 'These credentials do not match our records.',
+            ])->onlyInput('email');
+        }
+
+        if (! $request->user()?->is_admin) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()->withErrors([
+                'email' => 'This account does not have control-room access.',
+            ])->onlyInput('email');
+        }
+
+        $request->session()->regenerate();
+
+        return redirect()->route('admin.dashboard');
     }
 
     public function showRegister(): Response
@@ -67,10 +110,12 @@ class AuthController extends Controller
 
     public function logout(Request $request): RedirectResponse
     {
+        $wasAdmin = (bool) $request->user()?->is_admin;
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('home');
+        return redirect()->route($wasAdmin ? 'admin.login' : 'home');
     }
 }

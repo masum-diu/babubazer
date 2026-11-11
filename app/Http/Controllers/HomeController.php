@@ -12,8 +12,11 @@ class HomeController extends Controller
 {
     public function __invoke(): Response
     {
+        $content = SitePage::content('home');
+
         return Inertia::render('home', [
-            'content' => SitePage::content('home'),
+            'content' => $content,
+            'bannerSlides' => $content['banner_slides'] ?? [],
             'categories' => Category::query()
                 ->whereNull('parent_id')
                 ->where('is_active', true)
@@ -28,7 +31,13 @@ class HomeController extends Controller
                 ->orderByDesc('id')
                 ->get(['id', 'name', 'slug', 'description', 'image']),
             'featured' => Product::query()
-                ->with('category:id,name,slug')
+                ->with([
+                    'category:id,name,slug',
+                    'colors:id,product_id,name,hex',
+                    'sizes:id,product_id,name',
+                    'variants:id,product_id,product_color_id,product_size_id,stock',
+                ])
+                ->withExists(['colors as has_colors', 'sizes as has_sizes'])
                 ->where('is_active', true)
                 ->where('is_featured', true)
                 ->latest()

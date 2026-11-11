@@ -29,8 +29,23 @@ class SitePage extends Model
             return $defaults;
         }
 
+        $content = $page->content ?? [];
+
+        if ($slug === 'home' && ! array_key_exists('banner_slides', $content)) {
+            $content['banner_slides'] = [[
+                'brand' => $content['hero_brand'] ?? $defaults['hero_brand'],
+                'title' => $content['hero_title'] ?? $defaults['hero_title'],
+                'text' => $content['hero_text'] ?? $defaults['hero_text'],
+                'image' => $content['hero_image'] ?? $defaults['hero_image'],
+                'primary' => $content['hero_cta_primary'] ?? $defaults['hero_cta_primary'],
+                'primary_url' => $content['hero_cta_primary_url'] ?? $defaults['hero_cta_primary_url'],
+                'secondary' => $content['hero_cta_secondary'] ?? $defaults['hero_cta_secondary'],
+                'secondary_url' => $content['hero_cta_secondary_url'] ?? $defaults['hero_cta_secondary_url'],
+            ]];
+        }
+
         return array_replace($defaults, array_filter(
-            $page->content ?? [],
+            $content,
             fn ($value) => $value !== null && $value !== '',
         ));
     }

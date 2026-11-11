@@ -18,7 +18,7 @@ import { FlashBanner } from '@/components/FlashBanner';
 
 const links = [
     {
-        href: '/admin',
+        href: '/admin/dashboard',
         label: 'Overview',
         hint: 'Home',
         icon: LayoutDashboard,
@@ -62,8 +62,8 @@ const links = [
 ];
 
 function isActive(pathname: string, href: string) {
-    if (href === '/admin') {
-        return pathname === '/admin' || pathname === '/admin/';
+    if (href === '/admin/dashboard') {
+        return pathname === href;
     }
     return pathname === href || pathname.startsWith(`${href}/`);
 }
@@ -131,11 +131,11 @@ export default function AdminLayout({
             <div className="relative mx-auto flex min-h-screen max-w-[1400px] gap-0 lg:gap-6 lg:px-4 lg:py-4 print:block print:max-w-none print:p-0">
                 <aside className="hidden w-72 shrink-0 flex-col rounded-[1.75rem] border border-white/10 bg-ink/80 p-5 backdrop-blur-xl lg:flex print:hidden">
                     <Link
-                        href="/admin"
+                        href="/admin/dashboard"
                         prefetch={false}
                         className="block"
                         onClick={(e) => {
-                            if (pathname === '/admin' || pathname === '/admin/') {
+                            if (pathname === '/admin/dashboard') {
                                 e.preventDefault();
                             }
                         }}
@@ -179,7 +179,7 @@ export default function AdminLayout({
                         <div className="flex items-center justify-between gap-3">
                             <div className="min-w-0">
                                 <Link
-                                    href="/admin"
+                                    href="/admin/dashboard"
                                     prefetch={false}
                                     className="mb-2 block lg:hidden"
                                 >

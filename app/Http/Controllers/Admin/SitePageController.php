@@ -8,11 +8,16 @@ use App\Support\ImageUpload;
 use App\Support\SiteDefaults;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class SitePageController extends Controller
 {
+    private const STRUCTURED_FIELDS = [
+        'banner_slides',
+    ];
+
     private const IMAGE_FIELDS = [
         'hero_image',
         'story_image',
@@ -36,7 +41,7 @@ class SitePageController extends Controller
             'page' => [
                 'slug' => $page->slug,
                 'title' => $page->title,
-                'content' => array_replace($defaults[$slug]['content'], $page->content ?? []),
+                'content' => SitePage::content($slug),
             ],
             'pages' => collect($defaults)->map(fn ($meta, $key) => [
                 'slug' => $key,
@@ -54,7 +59,8 @@ class SitePageController extends Controller
 
         $allowed = array_keys($defaults[$page]['content']);
         $imageKeys = array_values(array_intersect($allowed, self::IMAGE_FIELDS));
-        $textKeys = array_values(array_diff($allowed, $imageKeys));
+        $structuredKeys = array_values(array_intersect($allowed, self::STRUCTURED_FIELDS));
+        $textKeys = array_values(array_diff($allowed, [...$imageKeys, ...$structuredKeys]));
 
         $rules = collect($textKeys)->mapWithKeys(
             fn ($key) => [$key => ['nullable', 'string', 'max:2000']],
@@ -62,6 +68,19 @@ class SitePageController extends Controller
 
         foreach ($imageKeys as $key) {
             $rules[$key] = ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:1024'];
+        }
+
+        if (in_array('banner_slides', $structuredKeys, true)) {
+            $rules['banner_slides'] = ['required', 'array', 'min:1', 'max:6'];
+            $rules['banner_slides.*.brand'] = ['nullable', 'string', 'max:120'];
+            $rules['banner_slides.*.title'] = ['required', 'string', 'max:200'];
+            $rules['banner_slides.*.text'] = ['nullable', 'string', 'max:1000'];
+            $rules['banner_slides.*.image'] = ['nullable', 'string', 'max:2000'];
+            $rules['banner_slides.*.image_file'] = ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:1024'];
+            $rules['banner_slides.*.primary'] = ['nullable', 'string', 'max:100'];
+            $rules['banner_slides.*.primary_url'] = ['nullable', 'string', 'max:2000'];
+            $rules['banner_slides.*.secondary'] = ['nullable', 'string', 'max:100'];
+            $rules['banner_slides.*.secondary_url'] = ['nullable', 'string', 'max:2000'];
         }
 
         $validated = $request->validate($rules);
@@ -80,6 +99,40 @@ class SitePageController extends Controller
             if (array_key_exists($key, $validated)) {
                 $content[$key] = (string) ($validated[$key] ?? '');
             }
+        }
+
+        if (in_array('banner_slides', $structuredKeys, true)) {
+            $slides = $validated['banner_slides'];
+            $oldImages = collect($content['banner_slides'] ?? [])
+                ->pluck('image')
+                ->filter()
+                ->all();
+
+            foreach ($slides as $index => $slide) {
+                $imageFile = $request->file("banner_slides.$index.image_file");
+
+                if (! $imageFile && empty($slide['image'])) {
+                    throw ValidationException::withMessages([
+                        "banner_slides.$index.image" => 'Please upload an image for this banner slide.',
+                    ]);
+                }
+            }
+
+            foreach ($slides as $index => &$slide) {
+                $imageFile = $request->file("banner_slides.$index.image_file");
+                if ($imageFile) {
+                    $slide['image'] = ImageUpload::store($imageFile, 'banners');
+                }
+                unset($slide['image_file']);
+            }
+            unset($slide);
+
+            $newImages = collect($slides)->pluck('image')->filter()->all();
+            foreach (array_diff($oldImages, $newImages) as $oldImage) {
+                ImageUpload::delete($oldImage);
+            }
+
+            $content['banner_slides'] = $slides;
         }
 
         foreach ($imageKeys as $key) {
@@ -102,14 +155,7 @@ class SitePageController extends Controller
     {
         $labels = [
             'home' => [
-                'hero_image' => 'Hero image',
-                'hero_brand' => 'Hero brand',
-                'hero_title' => 'Hero title',
-                'hero_text' => 'Hero text',
-                'hero_cta_primary' => 'Primary button text',
-                'hero_cta_primary_url' => 'Primary button URL',
-                'hero_cta_secondary' => 'Secondary button text',
-                'hero_cta_secondary_url' => 'Secondary button URL',
+                'banner_slides' => 'Banner slides',
                 'categories_eyebrow' => 'Categories eyebrow',
                 'categories_title' => 'Categories title',
                 'featured_eyebrow' => 'Featured eyebrow',
@@ -196,7 +242,9 @@ class SitePageController extends Controller
                 'label' => $label,
                 'type' => in_array($key, self::IMAGE_FIELDS, true)
                     ? 'image'
-                    : (in_array($key, $long, true) ? 'textarea' : 'text'),
+                    : (in_array($key, self::STRUCTURED_FIELDS, true)
+                        ? 'slides'
+                        : (in_array($key, $long, true) ? 'textarea' : 'text')),
             ])
             ->values()
             ->all();

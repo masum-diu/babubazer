@@ -20,6 +20,12 @@ return Application::configure(basePath: dirname(__DIR__))
             AddLinkHeadersForPreloadedAssets::class,
         ]);
 
+        $middleware->redirectGuestsTo(
+            fn (Request $request): string => $request->is('admin', 'admin/*')
+                ? route('admin.login')
+                : route('login'),
+        );
+
         $middleware->alias([
             'admin' => EnsureUserIsAdmin::class,
         ]);
