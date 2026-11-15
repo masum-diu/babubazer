@@ -107,10 +107,12 @@ export default function AdminLayout({
     backLabel?: string;
 }>) {
     const page = usePage();
-    const { name, auth } = page.props as {
+    const { name: appName, auth, navbar } = page.props as {
         name: string;
+        navbar?: { brand_name?: string };
         auth?: { user?: { name?: string } | null };
     };
+    const name = navbar?.brand_name || appName;
     const pathname = page.url.split('?')[0];
     const logout = useForm({});
     const [menuOpen, setMenuOpen] = useState(false);

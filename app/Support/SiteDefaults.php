@@ -19,6 +19,10 @@ class SiteDefaults
                 'title' => 'Contact',
                 'content' => self::contact(),
             ],
+            'navbar' => [
+                'title' => 'Navbar',
+                'content' => self::navbar(),
+            ],
             'footer' => [
                 'title' => 'Footer',
                 'content' => self::footer(),
@@ -117,9 +121,19 @@ class SiteDefaults
         ];
     }
 
+    public static function navbar(): array
+    {
+        return [
+            'logo' => '',
+            'brand_name' => 'BabuBazer',
+            'tagline' => 'Baby essentials',
+        ];
+    }
+
     public static function footer(): array
     {
         return [
+            'logo' => '',
             'blurb' => 'Soft, safe and trusted baby care products — delivered to your door.',
             'links_title' => 'Quick links',
             'support_title' => 'Support',

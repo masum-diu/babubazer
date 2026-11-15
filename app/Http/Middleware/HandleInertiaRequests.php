@@ -35,6 +35,7 @@ class HandleInertiaRequests extends Middleware
                     : null,
             ],
             'cartCount' => $cart->count($request),
+            'navbar' => fn () => SitePage::content('navbar'),
             'footer' => fn () => SitePage::content('footer'),
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),

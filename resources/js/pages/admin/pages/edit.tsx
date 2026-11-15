@@ -57,6 +57,7 @@ export default function AdminPagesEdit({
 }) {
     const form = useForm<FormData>({ ...page.content });
     const [previews, setPreviews] = useState<Record<string, string>>({});
+    const [removed, setRemoved] = useState<Record<string, boolean>>({});
     const slides = Array.isArray(form.data.banner_slides)
         ? form.data.banner_slides
         : [];
@@ -64,6 +65,7 @@ export default function AdminPagesEdit({
     useEffect(() => {
         form.setData({ ...page.content });
         setPreviews({});
+        setRemoved({});
         // Reset when switching page tabs.
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page.slug, page.content]);
@@ -72,6 +74,9 @@ export default function AdminPagesEdit({
         'w-full rounded-2xl border border-line bg-white px-4 py-3 text-sm outline-none focus:border-leaf';
 
     const shownImage = (key: string) => {
+        if (removed[key]) {
+            return null;
+        }
         if (previews[key]) {
             return previews[key];
         }
@@ -98,6 +103,7 @@ export default function AdminPagesEdit({
 
         form.clearErrors(key);
         form.setData(key, file);
+        setRemoved((prev) => ({ ...prev, [key]: false }));
         setPreviews((prev) => ({
             ...prev,
             [key]: URL.createObjectURL(file),
@@ -117,6 +123,8 @@ export default function AdminPagesEdit({
             if (field.type === 'image') {
                 if (value instanceof File) {
                     payload[field.key] = value;
+                } else if (removed[field.key]) {
+                    payload[`remove_${field.key}`] = '1';
                 }
                 return;
             }
@@ -515,6 +523,35 @@ export default function AdminPagesEdit({
                                         Upload a new image to replace the
                                         current one. Max 1MB.
                                     </p>
+                                    {field.key === 'logo' &&
+                                        shownImage(field.key) && (
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    form.setData(field.key, '');
+                                                    setPreviews((prev) => {
+                                                        const next = {
+                                                            ...prev,
+                                                        };
+                                                        delete next[field.key];
+                                                        return next;
+                                                    });
+                                                    setRemoved((prev) => ({
+                                                        ...prev,
+                                                        [field.key]: true,
+                                                    }));
+                                                }}
+                                                className="inline-flex items-center gap-2 rounded-full border border-coral/40 px-4 py-2 text-sm font-medium text-coral-deep transition hover:bg-coral/10"
+                                            >
+                                                <Trash2 className="size-4" />
+                                                Delete logo
+                                            </button>
+                                        )}
+                                    {removed[field.key] && (
+                                        <p className="text-xs text-coral-deep">
+                                            Logo will be deleted when you save.
+                                        </p>
+                                    )}
                                 </div>
                             ) : field.type === 'textarea' ? (
                                 <textarea

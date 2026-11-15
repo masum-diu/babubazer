@@ -14,7 +14,9 @@ type Shared = {
             is_admin: boolean;
         } | null;
     };
+    navbar?: { logo?: string; brand_name?: string; tagline?: string };
     footer?: {
+        logo?: string;
         blurb?: string;
         links_title?: string;
         support_title?: string;
@@ -26,8 +28,9 @@ type Shared = {
 };
 
 export default function StoreLayout({ children }: PropsWithChildren) {
-    const { name, cartCount, auth, footer } = usePage()
+    const { name: appName, cartCount, auth, footer, navbar } = usePage()
         .props as unknown as Shared;
+    const name = navbar?.brand_name || appName;
     const [menuOpen, setMenuOpen] = useState(false);
     const searchForm = useForm({ q: '' });
     const logout = useForm({});
@@ -37,12 +40,22 @@ export default function StoreLayout({ children }: PropsWithChildren) {
             <header className="sticky top-0 z-40 border-b border-line/70 bg-mist/85 backdrop-blur-xl">
                 <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
                     <Link href="/" className="group">
-                        <span className="font-display block text-2xl leading-none text-ink transition group-hover:text-leaf-deep">
-                            {name}
-                        </span>
-                        <span className="text-xs tracking-[0.18em] text-ink-soft uppercase">
-                            Baby essentials
-                        </span>
+                        {navbar?.logo ? (
+                            <img
+                                src={navbar.logo}
+                                alt={name}
+                                className="h-11 w-auto max-w-[180px] object-contain"
+                            />
+                        ) : (
+                            <>
+                                <span className="font-display block text-2xl leading-none text-ink transition group-hover:text-leaf-deep">
+                                    {name}
+                                </span>
+                                <span className="text-xs tracking-[0.18em] text-ink-soft uppercase">
+                                    {navbar?.tagline ?? 'Baby essentials'}
+                                </span>
+                            </>
+                        )}
                     </Link>
 
                     <form
@@ -194,7 +207,15 @@ export default function StoreLayout({ children }: PropsWithChildren) {
             <footer className="mt-20 border-t border-line/80 bg-ink text-white">
                 <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-3 lg:px-8">
                     <div>
-                        <p className="font-display text-3xl">{name}</p>
+                        {footer?.logo ? (
+                            <img
+                                src={footer.logo}
+                                alt={name}
+                                className="h-14 w-auto max-w-[220px] object-contain"
+                            />
+                        ) : (
+                            <p className="font-display text-3xl">{name}</p>
+                        )}
                         <p className="mt-3 max-w-sm text-sm leading-relaxed text-white/70">
                             {footer?.blurb}
                         </p>

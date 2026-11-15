@@ -18,10 +18,13 @@ class SitePageController extends Controller
         'banner_slides',
     ];
 
+    private const REMOVABLE_IMAGE_FIELDS = ['logo'];
+
     private const IMAGE_FIELDS = [
         'hero_image',
         'story_image',
         'side_image',
+        'logo',
     ];
 
     public function edit(Request $request): Response
@@ -83,6 +86,10 @@ class SitePageController extends Controller
             $rules['banner_slides.*.secondary_url'] = ['nullable', 'string', 'max:2000'];
         }
 
+        foreach (self::REMOVABLE_IMAGE_FIELDS as $key) {
+            $rules["remove_$key"] = ['nullable', 'boolean'];
+        }
+
         $validated = $request->validate($rules);
 
         $sitePage = SitePage::query()->firstOrCreate(
@@ -140,6 +147,12 @@ class SitePageController extends Controller
             if ($file && ! is_array($file)) {
                 ImageUpload::delete($content[$key] ?? null);
                 $content[$key] = ImageUpload::store($file, 'pages');
+            } elseif (
+                in_array($key, self::REMOVABLE_IMAGE_FIELDS, true)
+                && $request->boolean("remove_$key")
+            ) {
+                ImageUpload::delete($content[$key] ?? null);
+                $content[$key] = '';
             }
         }
 
@@ -211,7 +224,13 @@ class SitePageController extends Controller
                 'form_success' => 'Form success message',
                 'form_button' => 'Form button text',
             ],
+            'navbar' => [
+                'logo' => 'Logo',
+                'brand_name' => 'Brand name',
+                'tagline' => 'Tagline',
+            ],
             'footer' => [
+                'logo' => 'Logo',
                 'blurb' => 'Footer blurb',
                 'links_title' => 'Links title',
                 'support_title' => 'Support title',
