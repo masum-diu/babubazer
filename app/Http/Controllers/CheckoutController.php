@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Services\CartService;
+use App\Services\StockService;
 use App\Support\BangladeshDivisions;
 use App\Support\ShippingFee;
 use Illuminate\Http\RedirectResponse;
@@ -116,15 +117,18 @@ class CheckoutController extends Controller
                     'line_total' => $line['line_total'],
                 ]);
 
-                if ($cartItem?->product_variant_id) {
-                    \App\Models\ProductVariant::whereKey($cartItem->product_variant_id)
-                        ->decrement('stock', $line['quantity']);
-                    $product = \App\Models\Product::find($line['product']['id']);
-                    $product?->syncStockFromVariants();
-                } else {
-                    \App\Models\Product::whereKey($line['product']['id'])
-                        ->decrement('stock', $line['quantity']);
-                }
+                $stockProduct = \App\Models\Product::find($line['product']['id']);
+                $stockVariant = $cartItem?->product_variant_id
+                    ? \App\Models\ProductVariant::find($cartItem->product_variant_id)
+                    : null;
+                StockService::adjust(
+                    $stockProduct,
+                    $stockVariant,
+                    -(int) $line['quantity'],
+                    'order',
+                    'Order '.$order->order_number,
+                    $order,
+                );
             }
 
             $this->cart->clear($request);

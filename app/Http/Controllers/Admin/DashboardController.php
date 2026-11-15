@@ -21,6 +21,8 @@ class DashboardController extends Controller
                 'customers' => User::where('is_admin', false)->count(),
                 'revenue' => (float) Order::whereIn('status', ['confirmed', 'shipped', 'delivered'])->sum('total'),
             ],
+            'stockSummary' => InventoryController::summary(),
+            'lowStock' => InventoryController::lowStockItems(),
             'recentOrders' => Order::query()->latest()->take(8)->get(),
         ]);
     }

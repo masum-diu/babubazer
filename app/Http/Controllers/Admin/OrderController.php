@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Services\StockService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -57,7 +58,21 @@ class OrderController extends Controller
             'status' => ['required', Rule::in(['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'])],
         ]);
 
+        $wasCancelled = $order->status === 'cancelled';
+        $willCancel = $data['status'] === 'cancelled';
+        $order->load('items');
+
+        if ($wasCancelled && ! $willCancel && ! StockService::orderHasEnoughStock($order)) {
+            return back()->with('error', 'Not enough stock to re-open this order.');
+        }
+
         $order->update($data);
+
+        if (! $wasCancelled && $willCancel) {
+            StockService::restoreOrder($order, $request->user()?->id);
+        } elseif ($wasCancelled && ! $willCancel) {
+            StockService::deductOrder($order, $request->user()?->id);
+        }
 
         return back()->with('success', 'Order status updated');
     }

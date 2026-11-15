@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
+use App\Services\StockService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -192,6 +193,8 @@ class BulkProductController extends Controller
                         );
                     }
                 }
+
+                StockService::logTotal($product, 0, 'import', 'Bulk upload', auth()->id());
             }
         });
 

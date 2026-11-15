@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import {
+    AlertTriangle,
     ArrowRight,
     PackagePlus,
     ShoppingBag,
@@ -17,8 +18,17 @@ const statusTone: Record<string, string> = {
 
 export default function AdminDashboard({
     stats,
+    stockSummary,
+    lowStock,
     recentOrders,
 }: {
+    stockSummary: { in: number; low: number; out: number };
+    lowStock: Array<{
+        product_id: number;
+        name: string;
+        variant: string | null;
+        stock: number;
+    }>;
     stats: {
         products: number;
         orders: number;
@@ -126,6 +136,65 @@ export default function AdminDashboard({
                         </p>
                     </div>
                 ))}
+            </div>
+
+            <div className="mt-6 overflow-hidden rounded-[1.5rem] border border-line bg-white">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-4">
+                    <div className="flex items-center gap-3">
+                        <AlertTriangle className="h-5 w-5 text-coral-deep" />
+                        <div>
+                            <h2 className="font-display text-2xl">
+                                Low stock
+                            </h2>
+                            <p className="text-sm text-ink-soft">
+                                {stockSummary.low} low · {stockSummary.out} out
+                                of stock
+                            </p>
+                        </div>
+                    </div>
+                    <Link
+                        href="/admin/inventory"
+                        className="inline-flex items-center gap-1.5 rounded-full bg-foam px-4 py-2 text-sm font-medium text-leaf-deep"
+                    >
+                        Open inventory
+                        <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
+                </div>
+                <div className="divide-y divide-line">
+                    {lowStock.length === 0 && (
+                        <p className="px-5 py-6 text-sm text-ink-soft">
+                            Everything is well stocked.
+                        </p>
+                    )}
+                    {lowStock.map((item, index) => (
+                        <Link
+                            key={`${item.product_id}-${index}`}
+                            href={`/admin/inventory?q=${encodeURIComponent(item.name)}`}
+                            className="flex items-center justify-between gap-3 px-5 py-3 transition hover:bg-mist/80"
+                        >
+                            <span className="text-sm text-ink">
+                                {item.name}
+                                {item.variant && (
+                                    <span className="text-ink-soft">
+                                        {' '}
+                                        · {item.variant}
+                                    </span>
+                                )}
+                            </span>
+                            <span
+                                className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                                    item.stock <= 0
+                                        ? 'bg-coral/15 text-coral-deep'
+                                        : 'bg-sun/25 text-ink'
+                                }`}
+                            >
+                                {item.stock <= 0
+                                    ? 'Out of stock'
+                                    : `${item.stock} left`}
+                            </span>
+                        </Link>
+                    ))}
+                </div>
             </div>
 
             <div className="mt-6 overflow-hidden rounded-[1.5rem] border border-line bg-white">

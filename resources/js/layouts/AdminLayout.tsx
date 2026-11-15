@@ -9,6 +9,7 @@ import {
     LayoutDashboard,
     LogOut,
     Menu,
+    Boxes,
     Package,
     Palette,
     Ruler,
@@ -37,6 +38,12 @@ const links = [
         label: 'Bulk upload',
         hint: 'CSV',
         icon: FileSpreadsheet,
+    },
+    {
+        href: '/admin/inventory',
+        label: 'Inventory',
+        hint: 'Stock',
+        icon: Boxes,
     },
     {
         href: '/admin/media',

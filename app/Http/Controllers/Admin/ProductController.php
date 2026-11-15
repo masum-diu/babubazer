@@ -7,6 +7,7 @@ use App\Models\AttributeColor;
 use App\Models\AttributeSize;
 use App\Models\Category;
 use App\Models\Product;
+use App\Services\StockService;
 use App\Support\ImageUpload;
 use App\Support\ProductVariantSync;
 use Illuminate\Http\RedirectResponse;
@@ -84,6 +85,7 @@ class ProductController extends Controller
 
         $product = Product::create($data);
         ProductVariantSync::sync($product, $request);
+        StockService::logTotal($product, 0, 'initial', 'Product created', $request->user()?->id);
 
         return redirect()->route('admin.products.index')->with('success', 'Product created');
     }
@@ -120,8 +122,10 @@ class ProductController extends Controller
             unset($data['image']);
         }
 
+        $stockBefore = (int) $product->stock;
         $product->update($data);
         ProductVariantSync::sync($product->fresh(), $request);
+        StockService::logTotal($product, $stockBefore, 'product_edit', 'Product form', $request->user()?->id);
 
         return redirect()->route('admin.products.index')->with('success', 'Product updated');
     }
