@@ -1,6 +1,6 @@
 import { createInertiaApp } from '@inertiajs/react';
 
-const appName = import.meta.env.VITE_APP_NAME || 'BabuBazer';
+const appName = import.meta.env.VITE_APP_NAME || 'BabuuBazaar';
 
 void createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),

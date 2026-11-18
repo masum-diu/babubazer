@@ -29,7 +29,7 @@ type BannerSlide = {
 type FormData = Record<string, string | File | null | BannerSlide[]>;
 
 const emptySlide = (): BannerSlide => ({
-    brand: 'BabuBazer',
+    brand: 'BabuuBazaar',
     title: '',
     text: '',
     image: '',

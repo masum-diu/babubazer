@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\SitePage;
+use App\Support\PageMeta;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -17,6 +18,10 @@ class HomeController extends Controller
         return Inertia::render('home', [
             'content' => $content,
             'bannerSlides' => $content['banner_slides'] ?? [],
+            'meta' => PageMeta::make(
+                $content['banner_slides'][0]['text'] ?? null,
+                $content['banner_slides'][0]['image'] ?? null,
+            ),
             'categories' => Category::query()
                 ->whereNull('parent_id')
                 ->where('is_active', true)

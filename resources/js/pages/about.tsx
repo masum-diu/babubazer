@@ -23,7 +23,7 @@ export default function About({
                 <div className="absolute inset-0">
                     <img
                         src={content.hero_image}
-                        alt={content.hero_brand || 'BabuBazer'}
+                        alt={content.hero_brand || 'BabuuBazaar'}
                         className="h-full w-full object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-r from-ink/90 via-ink/65 to-ink/25" />

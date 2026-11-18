@@ -84,7 +84,7 @@ export default function AdminDashboard({
 
             <div className="mb-6 overflow-hidden rounded-[1.5rem] bg-gradient-to-r from-ink via-[#164048] to-leaf p-5 text-white sm:p-6">
                 <p className="text-[11px] tracking-[0.2em] text-white/55 uppercase">
-                    Today at BabuBazer
+                    Today at BabuuBazaar
                 </p>
                 <h2 className="font-display mt-2 max-w-xl text-2xl sm:text-3xl">
                     Keep the catalog stocked and sales moving.

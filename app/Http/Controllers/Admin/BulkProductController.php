@@ -51,10 +51,10 @@ class BulkProductController extends Controller
         $headers = [...self::REQUIRED_HEADERS, ...self::OPTIONAL_HEADERS];
         $category = Category::query()->value('slug') ?? '';
         $samples = [
-            ['Soft Baby Blanket', $category, '850', 'Soft cotton blanket', 'BabuBazer', '0-12 months', '', '1000', '', 'false', 'true', 'blanket', 'Cream', '#f5e6c8', 'Small', '8', ''],
-            ['Soft Baby Blanket', $category, '850', 'Soft cotton blanket', 'BabuBazer', '0-12 months', '', '1000', '', 'false', 'true', 'blanket', 'Cream', '#f5e6c8', 'Large', '6', ''],
-            ['Soft Baby Blanket', $category, '850', 'Soft cotton blanket', 'BabuBazer', '0-12 months', '', '1000', '', 'false', 'true', 'blanket', 'Blue', '#7db5e8', 'Small', '5', ''],
-            ['Soft Baby Blanket', $category, '850', 'Soft cotton blanket', 'BabuBazer', '0-12 months', '', '1000', '', 'false', 'true', 'blanket', 'Blue', '#7db5e8', 'Large', '4', ''],
+            ['Soft Baby Blanket', $category, '850', 'Soft cotton blanket', 'BabuuBazaar', '0-12 months', '', '1000', '', 'false', 'true', 'blanket', 'Cream', '#f5e6c8', 'Small', '8', ''],
+            ['Soft Baby Blanket', $category, '850', 'Soft cotton blanket', 'BabuuBazaar', '0-12 months', '', '1000', '', 'false', 'true', 'blanket', 'Cream', '#f5e6c8', 'Large', '6', ''],
+            ['Soft Baby Blanket', $category, '850', 'Soft cotton blanket', 'BabuuBazaar', '0-12 months', '', '1000', '', 'false', 'true', 'blanket', 'Blue', '#7db5e8', 'Small', '5', ''],
+            ['Soft Baby Blanket', $category, '850', 'Soft cotton blanket', 'BabuuBazaar', '0-12 months', '', '1000', '', 'false', 'true', 'blanket', 'Blue', '#7db5e8', 'Large', '4', ''],
         ];
 
         return response()->streamDownload(function () use ($headers, $samples): void {

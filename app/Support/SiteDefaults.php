@@ -39,7 +39,7 @@ class SiteDefaults
     {
         return [
             'hero_image' => 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=1600&q=80',
-            'hero_brand' => 'BabuBazer',
+            'hero_brand' => 'BabuuBazaar',
             'hero_title' => 'Big care for little ones — delivered home',
             'hero_text' => 'Care, diapers, feeding, toys and clothing — trusted baby products you can order in one click.',
             'hero_cta_primary' => 'Start shopping',
@@ -47,7 +47,7 @@ class SiteDefaults
             'hero_cta_secondary' => 'Browse shop',
             'hero_cta_secondary_url' => '/shop',
             'banner_slides' => [[
-                'brand' => 'BabuBazer',
+                'brand' => 'BabuuBazaar',
                 'title' => 'Big care for little ones — delivered home',
                 'text' => 'Care, diapers, feeding, toys and clothing — trusted baby products you can order in one click.',
                 'image' => 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=1600&q=80',
@@ -60,7 +60,7 @@ class SiteDefaults
             'categories_title' => 'What does your little one need?',
             'featured_eyebrow' => 'Featured',
             'featured_title' => "Today's picks",
-            'promises_eyebrow' => 'Why BabuBazer',
+            'promises_eyebrow' => 'Why BabuuBazaar',
             'promises_title' => 'Easy, safe shopping for little ones',
             'promise_1_title' => 'Free delivery over ৳2000',
             'promise_1_text' => 'Shipping free on larger orders',
@@ -75,12 +75,12 @@ class SiteDefaults
     {
         return [
             'hero_image' => 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=1600&q=80',
-            'hero_brand' => 'BabuBazer',
+            'hero_brand' => 'BabuuBazaar',
             'hero_title' => 'Built for parents. Soft on little ones.',
             'hero_text' => 'A calmer way to shop baby clothing and essentials — thoughtful picks, clear details, delivered home.',
             'story_eyebrow' => 'Our story',
             'story_title' => 'Shopping for baby should feel easy.',
-            'story_text' => 'We started BabuBazer to remove the noise from baby shopping. Every romper, set, and accessory is picked for comfort first — then style, then a price that makes sense for everyday parents.',
+            'story_text' => 'We started BabuuBazaar to remove the noise from baby shopping. Every romper, set, and accessory is picked for comfort first — then style, then a price that makes sense for everyday parents.',
             'story_image' => 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=1000&q=80',
             'story_image_caption' => 'Soft fabrics. Real care.',
             'pillar_1_title' => 'Chosen with care',
@@ -100,7 +100,7 @@ class SiteDefaults
     public static function contact(): array
     {
         return [
-            'hero_brand' => 'BabuBazer',
+            'hero_brand' => 'BabuuBazaar',
             'hero_title' => "Say hello — we're happy to help",
             'hero_text' => 'Questions about sizes, orders, or delivery? Drop a message and we\'ll get back soon.',
             'reach_eyebrow' => 'Reach us',
@@ -110,7 +110,7 @@ class SiteDefaults
             'phone_label' => 'Call',
             'phone' => '+880 1700-000000',
             'email_label' => 'Email',
-            'email' => 'hello@babubazer.com',
+            'email' => 'hello@babuubazaar.com',
             'hours_label' => 'Hours',
             'hours' => 'Sat–Thu, 10am – 8pm',
             'side_image' => 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=1000&q=80',
@@ -125,7 +125,7 @@ class SiteDefaults
     {
         return [
             'logo' => '',
-            'brand_name' => 'BabuBazer',
+            'brand_name' => 'BabuuBazaar',
             'tagline' => 'Baby essentials',
         ];
     }
@@ -138,7 +138,7 @@ class SiteDefaults
             'links_title' => 'Quick links',
             'support_title' => 'Support',
             'hotline' => '01700-000000',
-            'email' => 'hello@babubazer.com',
+            'email' => 'hello@babuubazaar.com',
             'note' => 'Fast delivery across Bangladesh',
             'copyright_suffix' => 'Made for little ones.',
         ];

@@ -116,7 +116,7 @@ export default function Contact({
                         <div className="overflow-hidden rounded-[1.75rem]">
                             <img
                                 src={content.side_image}
-                                alt="BabuBazer support"
+                                alt="BabuuBazaar support"
                                 className="aspect-[5/3] w-full object-cover"
                             />
                         </div>

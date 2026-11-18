@@ -40,7 +40,8 @@ return [
 
         'public' => [
             'driver' => 'local',
-            'root' => storage_path('app/public'),
+            // On shared hosting (no symlinks) PUBLIC_STORAGE_PATH points straight at public_html/storage.
+            'root' => env('PUBLIC_STORAGE_PATH') ?: storage_path('app/public'),
             'url' => rtrim((string) env('APP_URL', 'http://localhost'), '/').'/storage',
             'visibility' => 'public',
             'throw' => false,

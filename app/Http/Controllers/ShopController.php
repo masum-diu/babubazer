@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Support\PageMeta;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -119,6 +120,13 @@ class ShopController extends Controller
         return Inertia::render('shop/show', [
             'product' => $product,
             'related' => $related,
+            'meta' => PageMeta::make(
+                $product->description ?: $product->name.' - '.config('app.name'),
+                $product->image,
+                'product',
+                $product->price,
+                $product->name,
+            ),
         ]);
     }
 }

@@ -34,7 +34,7 @@ export default function AccountOrders({
                     <div className="flex flex-wrap items-end justify-between gap-4">
                         <div>
                             <p className="font-display text-5xl leading-none text-ink sm:text-6xl">
-                                BabuBazer
+                                BabuuBazaar
                             </p>
                             <h1 className="mt-4 text-2xl font-medium text-ink sm:text-3xl">
                                 Your orders

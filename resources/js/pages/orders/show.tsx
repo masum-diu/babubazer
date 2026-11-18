@@ -70,7 +70,7 @@ export default function OrderShow({ order }: { order: Order }) {
                     <div className="mt-5 flex flex-wrap items-end justify-between gap-4">
                         <div>
                             <p className="font-display text-5xl leading-none text-ink sm:text-6xl">
-                                BabuBazer
+                                BabuuBazaar
                             </p>
                             <h1 className="mt-4 flex items-center gap-2 text-2xl font-medium text-ink sm:text-3xl">
                                 <CheckCircle2 className="h-7 w-7 text-leaf" />

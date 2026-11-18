@@ -18,7 +18,7 @@ export default function AdminLogin() {
             <Head title="Admin login" />
             <section className="w-full max-w-md rounded-[2rem] border border-white/10 bg-white/5 p-7 shadow-2xl backdrop-blur sm:p-9">
                 <p className="text-sm tracking-[0.2em] text-leaf uppercase">
-                    BabuBazer
+                    BabuuBazaar
                 </p>
                 <h1 className="mt-2 font-display text-4xl">Admin login</h1>
                 <p className="mt-3 text-sm text-white/60">
