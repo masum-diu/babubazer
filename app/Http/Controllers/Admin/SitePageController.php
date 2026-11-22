@@ -224,6 +224,14 @@ class SitePageController extends Controller
                 'form_success' => 'Form success message',
                 'form_button' => 'Form button text',
             ],
+            'topbar' => [
+                'announcement_1' => 'Text 1 (truck icon)',
+                'announcement_2' => 'Text 2 (shield icon)',
+                'announcement_3' => 'Text 3 (support icon)',
+                'facebook_url' => 'Facebook URL',
+                'instagram_url' => 'Instagram URL',
+                'youtube_url' => 'YouTube URL',
+            ],
             'navbar' => [
                 'logo' => 'Logo',
                 'brand_name' => 'Brand name',
@@ -238,6 +246,9 @@ class SitePageController extends Controller
                 'email' => 'Email',
                 'note' => 'Support note',
                 'copyright_suffix' => 'Copyright suffix',
+                'tagline' => 'Footer tagline',
+                'newsletter_title' => 'Newsletter title',
+                'newsletter_text' => 'Newsletter text',
             ],
         ];
 

@@ -36,9 +36,19 @@ class HandleInertiaRequests extends Middleware
                     : null,
             ],
             'cartCount' => $cart->count($request),
-            'wishlistIds' => fn () => $request->user()
-                ? $request->user()->wishlist()->pluck('products.id')->all()
-                : [],
+            'wishlistIds' => function () use ($request) {
+                if (! $request->user()) {
+                    return [];
+                }
+
+                try {
+                    return $request->user()->wishlist()->pluck('products.id')->all();
+                } catch (\Throwable) {
+                    // e.g. migration not applied yet: never break page rendering over the heart icon
+                    return [];
+                }
+            },
+            'topbar' => fn () => SitePage::content('topbar'),
             'navbar' => fn () => SitePage::content('navbar'),
             'footer' => fn () => SitePage::content('footer'),
             'sidebarCategories' => fn () => $request->is('admin*')

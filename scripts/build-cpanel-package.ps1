@@ -49,6 +49,9 @@ require $base.'/vendor/autoload.php';
 /** @var Application $app */
 $app = require_once $base.'/bootstrap/app.php';
 
+// The public folder is public_html itself (Vite manifest in build/, uploads in storage/).
+$app->usePublicPath(__DIR__);
+
 $app->handleRequest(Request::capture());
 '@
 # UTF-8 *without* BOM (a BOM before <?php breaks headers), LF line endings.
@@ -63,6 +66,12 @@ $installer = (Get-Content "$root\scripts\install.php" -Raw).Replace('__TOKEN__',
 [System.IO.File]::WriteAllText("$stage\public_html\install.php", $installer, (New-Object System.Text.UTF8Encoding($false)))
 New-Item -ItemType Directory -Force "$root\deploy" | Out-Null
 Set-Content -Path "$root\deploy\INSTALL-LINK.txt" -Value "https://YOUR-DOMAIN/install.php?token=$token"
+
+# Browser updater (applies new migrations + refreshes caches on an already-installed site).
+$utoken = -join ((48..57) + (97..122) | Get-Random -Count 32 | ForEach-Object { [char]$_ })
+$updater = (Get-Content "$root\scripts\update.php" -Raw).Replace('__TOKEN__', $utoken).Replace("`r`n", "`n")
+[System.IO.File]::WriteAllText("$stage\public_html\update.php", $updater, (New-Object System.Text.UTF8Encoding($false)))
+Set-Content -Path "$root\deploy\UPDATE-LINK.txt" -Value "https://YOUR-DOMAIN/update.php?token=$utoken"
 tar -czf "$root\deploy\babubazer-deploy.tar.gz" -C $stage babubazer public_html
 Remove-Item $stage -Recurse -Force
 Get-ChildItem "$root\deploy" | Format-Table Name, @{n='MB';e={[math]::Round($_.Length/1MB,1)}}

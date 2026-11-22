@@ -19,6 +19,10 @@ class SiteDefaults
                 'title' => 'Contact',
                 'content' => self::contact(),
             ],
+            'topbar' => [
+                'title' => 'Top bar',
+                'content' => self::topbar(),
+            ],
             'navbar' => [
                 'title' => 'Navbar',
                 'content' => self::navbar(),
@@ -130,6 +134,18 @@ class SiteDefaults
         ];
     }
 
+    public static function topbar(): array
+    {
+        return [
+            'announcement_1' => 'Free Delivery on Orders Above ৳1,000',
+            'announcement_2' => 'Easy Exchange',
+            'announcement_3' => '24/7 Support',
+            'facebook_url' => '',
+            'instagram_url' => '',
+            'youtube_url' => '',
+        ];
+    }
+
     public static function footer(): array
     {
         return [
@@ -141,6 +157,9 @@ class SiteDefaults
             'email' => 'hello@babuubazaar.com',
             'note' => 'Fast delivery across Bangladesh',
             'copyright_suffix' => 'Made for little ones.',
+            'tagline' => 'Dress Happy, Grow Happy!',
+            'newsletter_title' => 'Join Our Little Fashion Family!',
+            'newsletter_text' => 'Get updates on new arrivals and special offers.',
         ];
     }
 }

@@ -168,7 +168,7 @@ export default function Home({
                 )}
             </section>
 
-            <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+            <section className="px-4 py-14 sm:px-6 lg:px-0">
                 <div className="mb-8 flex items-end justify-between gap-4">
                     <div>
                         <p className="text-sm tracking-[0.2em] text-leaf uppercase">
@@ -209,7 +209,7 @@ export default function Home({
                 </div>
             </section>
 
-            <section className="mx-auto max-w-7xl px-4 pb-14 sm:px-6 lg:px-8">
+            <section className="px-4 pb-14 sm:px-6 lg:px-0">
                 <div className="mb-6 flex items-center justify-between gap-4">
                     <div>
                         <p className="text-xs tracking-[0.2em] text-leaf-deep uppercase">
@@ -262,7 +262,7 @@ export default function Home({
             <section className="relative overflow-hidden border-y border-line/70">
                 <div className="absolute inset-0 bg-gradient-to-br from-sky/40 via-mist to-blush/50" />
 
-                <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+                <div className="relative px-4 py-14 sm:px-8 lg:px-10">
                     <div className="mb-10 max-w-xl">
                         <p className="text-sm tracking-[0.2em] text-leaf uppercase">
                             {content.promises_eyebrow}

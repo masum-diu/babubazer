@@ -1,7 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { ProductCard, type ProductCardData } from '@/components/ProductCard';
-import { type SidebarCategory } from '@/components/StoreSidebar';
+import { type SidebarCategory } from '@/lib/categories';
 import StoreLayout from '@/layouts/StoreLayout';
 
 type Paginator = {
@@ -48,7 +48,7 @@ export default function ShopIndex({
     const activeName =
         categories
             .flatMap((c) => [c, ...(c.children ?? [])])
-            .find((c) => c.slug === filters.category)?.name ?? 'All Products';
+            .find((c) => c.slug === filters.category)?.name ?? 'Shop';
 
     const pageBtn =
         'inline-flex size-9 items-center justify-center rounded-lg border border-line bg-white text-ink-soft transition hover:border-leaf hover:text-leaf-deep';
@@ -113,7 +113,7 @@ export default function ShopIndex({
                                 onChange={(e) =>
                                     update('category', e.target.value)
                                 }
-                                className={`${pill} lg:hidden`}
+                                className={pill}
                             >
                                 <option value="">All categories</option>
                                 {categories.map((category) => (

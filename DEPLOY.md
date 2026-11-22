@@ -27,8 +27,13 @@ Outputs in `deploy/`:
 Uploaded images are stored directly in `public_html/storage` (no symlink needed on shared hosting).
 
 ## Updating later (no Terminal)
-Rebuild, upload and extract over the old files in `/home/USER/`. Your `.env` and `public_html/storage` uploads are not in the archive, so they stay.
-Database changes (new migrations) are not auto-applied in this mode – if a release adds a migration, tell the developer; a one-time update helper is needed (or use Terminal: `cd ~/babubazer && bash install.sh`).
+1. Rebuild (`scripts\build-cpanel-package.ps1`), upload `babubazer-deploy.tar.gz` to `/home/USER/` and **Extract** over the old files (overwrite). Your `.env` and `public_html/storage` uploads are not in the archive, so they stay.
+2. Right away open the link from `deploy/UPDATE-LINK.txt` (replace `YOUR-DOMAIN`) → **Run update**.
+   It applies new migrations, clears the view cache and rebuilds the config/route caches, then deletes itself.
+   Do this on every update: without it, new routes/pages can 404 because of the old route cache, and new database tables are missing.
+3. Delete the uploaded `.tar.gz`.
+
+Each build creates a new random token, so use the `UPDATE-LINK.txt` of the latest build.
 
 If Terminal is available, `bash install.sh` is the alternative to the browser installer and also handles updates.
 
