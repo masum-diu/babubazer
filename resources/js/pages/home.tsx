@@ -140,31 +140,27 @@ export default function Home({
                 </div>
 
                 {slides.length > 1 && (
-                    <>
-                        <div
-                            className="absolute inset-x-0 bottom-3 z-10 flex items-center justify-center gap-2"
-                            aria-label="Choose banner"
-                        >
-                            {slides.map((slide, index) => (
-                                <button
-                                    key={`${slide.title}-dot`}
-                                    type="button"
-                                    aria-label={`Go to banner ${index + 1}`}
-                                    aria-current={
-                                        activeSlide === index
-                                            ? 'true'
-                                            : undefined
-                                    }
-                                    onClick={() => showSlide(index)}
-                                    className={`h-2.5 rounded-full transition-all ${
-                                        activeSlide === index
-                                            ? 'w-7 bg-white'
-                                            : 'w-2.5 bg-white/55 hover:bg-white/80'
-                                    }`}
-                                />
-                            ))}
-                        </div>
-                    </>
+                    <div
+                        className="absolute inset-x-0 bottom-3 z-10 flex items-center justify-center gap-2"
+                        aria-label="Choose banner"
+                    >
+                        {slides.map((slide, index) => (
+                            <button
+                                key={`${slide.title}-dot`}
+                                type="button"
+                                aria-label={`Go to banner ${index + 1}`}
+                                aria-current={
+                                    activeSlide === index ? 'true' : undefined
+                                }
+                                onClick={() => showSlide(index)}
+                                className={`h-2.5 rounded-full transition-all ${
+                                    activeSlide === index
+                                        ? 'w-7 bg-white'
+                                        : 'w-2.5 bg-white/55 hover:bg-white/80'
+                                }`}
+                            />
+                        ))}
+                    </div>
                 )}
             </section>
 
