@@ -166,19 +166,20 @@ export default function Home({
 
             <section className="px-4 py-14 sm:px-6 lg:px-0">
                 <div className="mb-8 flex items-end justify-between gap-4">
-                    <div>
-                        <p className="text-sm tracking-[0.2em] text-leaf uppercase">
+                    <div className="min-w-0 flex-1">
+                        <p className="text-xs tracking-[0.2em] text-leaf uppercase sm:text-sm">
                             {content.categories_eyebrow}
                         </p>
-                        <h2 className="mt-2 font-display text-3xl text-ink">
+                        <h2 className="mt-2 font-display text-2xl leading-snug text-ink sm:text-3xl">
                             {content.categories_title}
                         </h2>
                     </div>
                     <Link
                         href="/shop"
-                        className="ml-auto text-sm font-medium text-leaf-deep"
+                        className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-leaf px-4 text-sm font-semibold whitespace-nowrap text-white transition hover:bg-leaf-deep"
                     >
-                        View all →
+                        View All
+                        <ArrowRight className="size-3.5" />
                     </Link>
                 </div>
                 <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
@@ -207,7 +208,7 @@ export default function Home({
 
             <section className="px-4 pb-14 sm:px-6 lg:px-0">
                 <div className="mb-6 flex items-center justify-between gap-4">
-                    <div>
+                    <div className="min-w-0">
                         <p className="text-xs tracking-[0.2em] text-leaf-deep uppercase">
                             {content.featured_eyebrow}
                         </p>
@@ -215,10 +216,10 @@ export default function Home({
                             {content.featured_title}
                         </h2>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex shrink-0 items-center gap-2">
                         <Link
                             href="/shop"
-                            className="inline-flex h-9 items-center gap-1.5 rounded-full bg-leaf px-4 text-sm font-semibold text-white transition hover:bg-leaf-deep"
+                            className="inline-flex h-9 items-center gap-1.5 rounded-full bg-leaf px-4 text-sm font-semibold whitespace-nowrap text-white transition hover:bg-leaf-deep"
                         >
                             View All
                             <ArrowRight className="size-3.5" />
