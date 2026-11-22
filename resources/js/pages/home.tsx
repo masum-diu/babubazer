@@ -125,7 +125,7 @@ export default function Home({
                         <div className="mt-4 flex flex-wrap items-center justify-center gap-3 sm:mt-5">
                             <Link
                                 href={slides[activeSlide].primary_url}
-                                className="inline-block bg-black px-6 py-3 text-xs font-bold tracking-[0.2em] text-white uppercase transition [text-shadow:none] hover:bg-black/80 sm:px-9"
+                                className="inline-block bg-leaf px-6 py-3 text-xs font-bold tracking-[0.2em] text-white uppercase transition [text-shadow:none] hover:bg-leaf-deep sm:px-9"
                             >
                                 {slides[activeSlide].primary}
                             </Link>
@@ -222,7 +222,7 @@ export default function Home({
                     <div className="flex items-center gap-2">
                         <Link
                             href="/shop"
-                            className="inline-flex h-9 items-center gap-1.5 rounded-full bg-sky px-4 text-sm font-semibold text-ink transition hover:bg-sky-deep"
+                            className="inline-flex h-9 items-center gap-1.5 rounded-full bg-leaf px-4 text-sm font-semibold text-white transition hover:bg-leaf-deep"
                         >
                             View All
                             <ArrowRight className="size-3.5" />

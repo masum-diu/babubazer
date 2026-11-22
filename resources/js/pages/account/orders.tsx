@@ -45,7 +45,7 @@ export default function AccountOrders({
                         </div>
                         <Link
                             href="/shop"
-                            className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-leaf-deep"
+                            className="inline-flex items-center gap-2 rounded-full bg-leaf px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-leaf-deep"
                         >
                             <ShoppingBag className="h-4 w-4" />
                             Continue shopping

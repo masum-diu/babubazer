@@ -19,7 +19,7 @@ export default function About({
         <StoreLayout>
             <Head title="About Us" />
 
-            <section className="relative overflow-hidden">
+            <section className="relative mx-4 mt-4 overflow-hidden rounded-2xl sm:mx-6 sm:mt-6 lg:mx-0">
                 <div className="absolute inset-0">
                     <img
                         src={content.hero_image}

@@ -363,7 +363,7 @@ export default function ProductShow({
                                                     }
                                                     className={`min-w-12 rounded-full px-4 py-2.5 text-sm font-medium transition ${
                                                         sizeId === size.id
-                                                            ? 'bg-ink text-white shadow-md shadow-ink/20'
+                                                            ? 'bg-leaf text-white shadow-md shadow-leaf/30'
                                                             : 'bg-white text-ink ring-1 ring-line hover:ring-leaf'
                                                     } disabled:cursor-not-allowed disabled:opacity-35`}
                                                 >

@@ -388,7 +388,7 @@ export function ProductCard({
                                                     }
                                                     className={`rounded-full px-4 py-2 text-sm ring-1 transition disabled:cursor-not-allowed disabled:opacity-35 ${
                                                         sizeId === size.id
-                                                            ? "bg-ink text-white ring-ink"
+                                                            ? "bg-leaf text-white ring-leaf"
                                                             : "text-ink ring-line hover:ring-leaf"
                                                     }`}
                                                 >
