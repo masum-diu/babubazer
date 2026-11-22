@@ -1,7 +1,8 @@
 import { Link, useForm, usePage } from '@inertiajs/react';
-import { ShoppingBag } from 'lucide-react';
+import { Heart, LogOut, Menu, Search, ShoppingBag, User, X } from 'lucide-react';
 import { type PropsWithChildren, useState } from 'react';
 import { FlashBanner } from '@/components/FlashBanner';
+import { StoreSidebar, type SidebarCategory } from '@/components/StoreSidebar';
 
 type Shared = {
     name: string;
@@ -15,6 +16,8 @@ type Shared = {
         } | null;
     };
     navbar?: { logo?: string; brand_name?: string; tagline?: string };
+    sidebarCategories?: SidebarCategory[];
+    wishlistIds?: number[];
     footer?: {
         logo?: string;
         blurb?: string;
@@ -27,173 +30,231 @@ type Shared = {
     };
 };
 
+const navLinks: Array<[string, string]> = [
+    ['Home', '/'],
+    ['All Products', '/shop'],
+    ['About', '/about'],
+    ['Contact', '/contact'],
+];
+
+const actionBtn =
+    'inline-flex h-10 items-center gap-2 rounded-full px-3 text-sm font-medium text-ink transition hover:bg-mist';
+
 export default function StoreLayout({ children }: PropsWithChildren) {
-    const { name: appName, cartCount, auth, footer, navbar } = usePage()
-        .props as unknown as Shared;
+    const {
+        name: appName,
+        cartCount,
+        auth,
+        footer,
+        navbar,
+        sidebarCategories,
+        wishlistIds = [],
+    } = usePage().props as unknown as Shared;
+    const { url } = usePage();
     const name = navbar?.brand_name || appName;
     const [menuOpen, setMenuOpen] = useState(false);
     const searchForm = useForm({ q: '' });
     const logout = useForm({});
 
+    const path = url.split('?')[0];
+    const activeCategory =
+        path === '/shop'
+            ? new URLSearchParams(url.split('?')[1] ?? '').get('category')
+            : null;
+    const isActive = (href: string) =>
+        href === '/' ? path === '/' : path.startsWith(href);
+
+    const submitSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        searchForm.get('/shop', { preserveState: true });
+    };
+
+    const searchBox = (
+        <form onSubmit={submitSearch} className="relative w-full">
+            <input
+                value={searchForm.data.q}
+                onChange={(e) => searchForm.setData('q', e.target.value)}
+                placeholder="Search baby food, diapers, toys..."
+                className="h-11 w-full rounded-full border border-leaf/60 bg-white pr-14 pl-5 text-sm transition outline-none focus:border-leaf focus:ring-2 focus:ring-leaf/25"
+            />
+            <button
+                type="submit"
+                aria-label="Search"
+                className="absolute top-1/2 right-1.5 inline-flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-leaf text-white transition hover:bg-leaf-deep"
+            >
+                <Search className="size-4" />
+            </button>
+        </form>
+    );
+
     return (
         <div className="min-h-screen">
-            <header className="sticky top-0 z-40 border-b border-line/70 bg-mist/85 backdrop-blur-xl">
-                <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
-                    <Link href="/" className="group">
+            <header className="sticky top-0 z-40 border-b border-line bg-white">
+                <div className="mx-auto flex h-[68px] max-w-[1600px] items-center gap-4 px-4 sm:px-6 lg:gap-8 lg:px-8">
+                    <Link href="/" className="group shrink-0">
                         {navbar?.logo ? (
                             <img
                                 src={navbar.logo}
                                 alt={name}
-                                className="h-11 w-auto max-w-[180px] object-contain"
+                                className="h-12 w-auto max-w-[180px] object-contain"
                             />
                         ) : (
                             <>
-                                <span className="font-display block text-2xl leading-none text-ink transition group-hover:text-leaf-deep">
+                                <span className="block font-display text-2xl leading-none font-semibold text-leaf transition group-hover:text-leaf-deep">
                                     {name}
                                 </span>
-                                <span className="text-xs tracking-[0.18em] text-ink-soft uppercase">
+                                <span className="text-[10px] tracking-[0.18em] text-ink-soft uppercase">
                                     {navbar?.tagline ?? 'Baby essentials'}
                                 </span>
                             </>
                         )}
                     </Link>
 
-                    <form
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            searchForm.get('/shop', { preserveState: true });
-                        }}
-                        className="hidden max-w-md flex-1 md:block"
-                    >
-                        <input
-                            value={searchForm.data.q}
-                            onChange={(e) =>
-                                searchForm.setData('q', e.target.value)
-                            }
-                            placeholder="Search diapers, toys, lotion..."
-                            className="w-full rounded-full border border-line bg-white/80 px-5 py-2.5 text-sm outline-none ring-leaf/30 transition focus:ring-2"
-                        />
-                    </form>
+                    <div className="mx-auto hidden w-full max-w-2xl md:block">
+                        {searchBox}
+                    </div>
 
-                    <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="ml-auto flex items-center gap-1 md:ml-0">
+                        {auth.user ? (
+                            <>
+                                {auth.user.is_admin && (
+                                    <Link
+                                        href="/admin"
+                                        prefetch={false}
+                                        className="mr-1 hidden h-10 items-center rounded-full bg-sky px-4 text-sm font-semibold text-ink xl:inline-flex"
+                                    >
+                                        Control room
+                                    </Link>
+                                )}
+                                <Link
+                                    href="/account/orders"
+                                    title={auth.user.name}
+                                    className={actionBtn}
+                                >
+                                    <User className="size-5" />
+                                    <span className="hidden max-w-30 truncate sm:inline">
+                                        {auth.user.name.split(' ')[0]}
+                                    </span>
+                                </Link>
+                                <button
+                                    type="button"
+                                    aria-label="Logout"
+                                    title="Logout"
+                                    onClick={() => logout.post('/logout')}
+                                    className={`${actionBtn} hidden px-2.5 sm:inline-flex`}
+                                >
+                                    <LogOut className="size-5" />
+                                </button>
+                            </>
+                        ) : (
+                            <Link href="/login" className={actionBtn}>
+                                <User className="size-5" />
+                                <span className="hidden sm:inline">
+                                    Account
+                                </span>
+                            </Link>
+                        )}
+
                         <Link
-                            href="/shop"
-                            className="hidden rounded-full px-3 py-2 text-sm font-medium text-ink-soft transition hover:text-ink sm:inline"
+                            href="/wishlist"
+                            aria-label="Wishlist"
+                            title="Wishlist"
+                            className={`${actionBtn} relative px-2.5`}
                         >
-                            Shop
+                            <Heart className="size-5" />
+                            {wishlistIds.length > 0 && (
+                                <span className="absolute top-0 right-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#ee4b6a] px-1 text-[10px] font-bold text-white">
+                                    {wishlistIds.length}
+                                </span>
+                            )}
                         </Link>
-                        <Link
-                            href="/about"
-                            className="hidden rounded-full px-3 py-2 text-sm font-medium text-ink-soft transition hover:text-ink sm:inline"
-                        >
-                            About
-                        </Link>
-                        <Link
-                            href="/contact"
-                            className="hidden rounded-full px-3 py-2 text-sm font-medium text-ink-soft transition hover:text-ink sm:inline"
-                        >
-                            Contact
-                        </Link>
+
                         <Link
                             href="/cart"
-                            className="relative inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-2 text-sm font-medium text-ink shadow-sm ring-1 ring-line transition hover:ring-leaf"
+                            className="relative ml-1 inline-flex h-11 items-center gap-2 rounded-full bg-mist px-4 text-sm font-semibold text-leaf-deep ring-1 ring-line transition hover:ring-leaf"
                         >
-                            <ShoppingBag className="h-4 w-4" />
-                            Bag
+                            <ShoppingBag className="size-5" />
+                            <span className="hidden sm:inline">Cart</span>
                             {cartCount > 0 && (
-                                <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-coral px-1 text-[11px] font-semibold text-white">
+                                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-leaf px-1 text-[11px] font-bold text-white">
                                     {cartCount}
                                 </span>
                             )}
                         </Link>
-                        {auth.user ? (
-                            <>
-                                {auth.user.is_admin && (
-                                    <Link
-                                        href="/admin"
-                                        prefetch={false}
-                                        className="hidden rounded-full bg-leaf px-3 py-2 text-sm font-medium text-white sm:inline"
-                                    >
-                                        Control room
-                                    </Link>
-                                )}
-                                <Link
-                                    href="/account/orders"
-                                    className="hidden rounded-full px-3 py-2 text-sm font-medium text-ink-soft sm:inline"
-                                >
-                                    Orders
-                                </Link>
-                                <button
-                                    type="button"
-                                    onClick={() => logout.post('/logout')}
-                                    className="hidden rounded-full px-3 py-2 text-sm text-ink-soft sm:inline"
-                                >
-                                    Logout
-                                </button>
-                            </>
-                        ) : (
-                            <Link
-                                href="/login"
-                                className="hidden rounded-full bg-ink px-4 py-2 text-sm font-medium text-white sm:inline"
-                            >
-                                Login
-                            </Link>
-                        )}
+
                         <button
                             type="button"
-                            className="rounded-full bg-white px-3 py-2 text-sm ring-1 ring-line md:hidden"
+                            aria-label="Menu"
+                            className="ml-1 inline-flex size-10 items-center justify-center rounded-full hover:bg-mist lg:hidden"
                             onClick={() => setMenuOpen((v) => !v)}
                         >
-                            Menu
+                            {menuOpen ? (
+                                <X className="size-5" />
+                            ) : (
+                                <Menu className="size-5" />
+                            )}
                         </button>
                     </div>
                 </div>
 
+                <div className="border-t border-line px-4 py-2.5 md:hidden">
+                    {searchBox}
+                </div>
+
                 {menuOpen && (
-                    <div className="space-y-2 border-t border-line bg-white px-4 py-4 md:hidden">
-                        <Link href="/shop" className="block py-2">
-                            Shop
-                        </Link>
-                        <Link href="/about" className="block py-2">
-                            About
-                        </Link>
-                        <Link href="/contact" className="block py-2">
-                            Contact
-                        </Link>
-                        <Link
-                            href="/cart"
-                            className="flex items-center gap-2 py-2"
-                        >
-                            <ShoppingBag className="h-4 w-4" />
-                            Bag ({cartCount})
-                        </Link>
+                    <div className="max-h-[70vh] space-y-1 overflow-y-auto border-t border-line bg-white px-4 py-3 lg:hidden">
+                        {navLinks.map(([label, href]) => (
+                            <Link
+                                key={href}
+                                href={href}
+                                className={`block rounded-xl px-3 py-2.5 font-medium ${
+                                    isActive(href)
+                                        ? 'bg-leaf/10 text-leaf-deep'
+                                        : ''
+                                }`}
+                            >
+                                {label}
+                            </Link>
+                        ))}
+                        {(sidebarCategories?.length ?? 0) > 0 && (
+                            <div className="mt-2 border-t border-line pt-3">
+                                <p className="px-3 pb-1 text-[11px] font-semibold tracking-[0.16em] text-ink-soft uppercase">
+                                    Categories
+                                </p>
+                                {sidebarCategories!.map((category) => (
+                                    <div key={category.id}>
+                                        <Link
+                                            href={`/shop?category=${category.slug}`}
+                                            className="block rounded-xl px-3 py-2 text-sm font-medium"
+                                        >
+                                            {category.name}
+                                        </Link>
+                                        {category.children?.map((child) => (
+                                            <Link
+                                                key={child.id}
+                                                href={`/shop?category=${child.slug}`}
+                                                className="block rounded-xl py-1.5 pr-3 pl-7 text-sm text-ink-soft"
+                                            >
+                                                {child.name}
+                                            </Link>
+                                        ))}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                         {auth.user ? (
-                            <>
-                                {auth.user.is_admin && (
-                                    <Link
-                                        href="/admin"
-                                        prefetch={false}
-                                        className="block py-2 font-medium text-leaf-deep"
-                                    >
-                                        Control room
-                                    </Link>
-                                )}
-                                <Link
-                                    href="/account/orders"
-                                    className="block py-2"
-                                >
-                                    My Orders
-                                </Link>
-                                <button
-                                    type="button"
-                                    className="block py-2"
-                                    onClick={() => logout.post('/logout')}
-                                >
-                                    Logout
-                                </button>
-                            </>
+                            <button
+                                type="button"
+                                className="mt-2 block w-full rounded-xl border-t border-line px-3 py-2.5 text-left"
+                                onClick={() => logout.post('/logout')}
+                            >
+                                Logout
+                            </button>
                         ) : (
-                            <Link href="/login" className="block py-2">
+                            <Link
+                                href="/login"
+                                className="block rounded-xl px-3 py-2.5"
+                            >
                                 Login
                             </Link>
                         )}
@@ -202,58 +263,72 @@ export default function StoreLayout({ children }: PropsWithChildren) {
             </header>
 
             <FlashBanner />
-            <main>{children}</main>
+            <div className="mx-auto flex max-w-[1600px] items-start gap-6 lg:px-8">
+                {sidebarCategories && (
+                    <StoreSidebar
+                        categories={sidebarCategories}
+                        activeSlug={activeCategory}
+                        allActive={path === '/shop'}
+                    />
+                )}
+                <main className="min-w-0 flex-1">{children}</main>
+            </div>
 
-            <footer className="mt-20 border-t border-line/80 bg-ink text-white">
+            <footer className="mt-20 bg-sky-deep text-ink">
                 <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-3 lg:px-8">
                     <div>
                         {footer?.logo ? (
                             <img
                                 src={footer.logo}
                                 alt={name}
-                                className="h-14 w-auto max-w-[220px] object-contain"
+                                className="h-16 w-auto max-w-[220px] object-contain"
                             />
                         ) : (
-                            <p className="font-display text-3xl">{name}</p>
+                            <p className="font-display text-3xl font-semibold text-leaf">
+                                {name}
+                            </p>
                         )}
-                        <p className="mt-3 max-w-sm text-sm leading-relaxed text-white/70">
+                        <p className="mt-3 max-w-sm text-sm leading-relaxed text-ink-soft">
                             {footer?.blurb}
                         </p>
                     </div>
                     <div>
-                        <p className="font-display text-lg">
+                        <p className="font-display text-lg font-semibold">
                             {footer?.links_title || 'Quick links'}
                         </p>
-                        <div className="mt-3 space-y-2 text-sm text-white/75">
-                            <Link href="/shop" className="block hover:text-white">
+                        <div className="mt-3 space-y-2 text-sm text-ink-soft">
+                            <Link
+                                href="/shop"
+                                className="block hover:text-leaf-deep"
+                            >
                                 All products
                             </Link>
                             <Link
                                 href="/about"
-                                className="block hover:text-white"
+                                className="block hover:text-leaf-deep"
                             >
                                 About Us
                             </Link>
                             <Link
                                 href="/contact"
-                                className="block hover:text-white"
+                                className="block hover:text-leaf-deep"
                             >
                                 Contact Us
                             </Link>
                         </div>
                     </div>
                     <div>
-                        <p className="font-display text-lg">
-                            {footer?.support_title || 'Support'}
+                        <p className="font-display text-lg font-semibold">
+                            {footer?.support_title || 'Customer Support'}
                         </p>
-                        <div className="mt-3 space-y-2 text-sm text-white/75">
+                        <div className="mt-3 space-y-2 text-sm text-ink-soft">
                             <p>Hotline: {footer?.hotline}</p>
                             <p>Email: {footer?.email}</p>
                             <p>{footer?.note}</p>
                         </div>
                     </div>
                 </div>
-                <div className="border-t border-white/10 py-4 text-center text-xs text-white/50">
+                <div className="border-t border-white/60 py-4 text-center text-xs text-ink-soft">
                     © {new Date().getFullYear()} {name}.{' '}
                     {footer?.copyright_suffix}
                 </div>

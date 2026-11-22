@@ -201,8 +201,8 @@ export default function AdminOrderShow({ order }: { order: Order }) {
                 </div>
 
                 <div className="px-5 pb-6 sm:px-8">
-                    <div className="overflow-hidden rounded-2xl border border-line">
-                        <table className="w-full text-left text-sm">
+                    <div className="overflow-x-auto rounded-2xl border border-line">
+                        <table className="w-full min-w-[520px] text-left text-sm">
                             <thead className="bg-mist text-[11px] tracking-[0.14em] text-ink-soft uppercase">
                                 <tr>
                                     <th className="px-4 py-3 font-medium">

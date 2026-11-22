@@ -1,8 +1,10 @@
-import { Link, router, useForm } from '@inertiajs/react';
-import { X } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { formatBdt } from '@/lib/money';
-import { cn } from '@/lib/utils';
+import { Link, router, useForm } from "@inertiajs/react";
+import { ShoppingBag, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import { formatBdt } from "@/lib/money";
+import { cn } from "@/lib/utils";
+import { WishlistButton } from "./WishlistButton";
 
 type ProductColorOption = {
     id: number;
@@ -83,14 +85,14 @@ export function ProductCard({
         }
 
         const closeOnEscape = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') {
+            if (event.key === "Escape") {
                 setOptionsOpen(false);
             }
         };
 
-        window.addEventListener('keydown', closeOnEscape);
+        window.addEventListener("keydown", closeOnEscape);
 
-        return () => window.removeEventListener('keydown', closeOnEscape);
+        return () => window.removeEventListener("keydown", closeOnEscape);
     }, [optionsOpen]);
 
     const selectedVariant =
@@ -145,24 +147,41 @@ export function ProductCard({
             product_color_id: colorId,
             product_size_id: sizeId,
         }));
-        form.post('/cart', {
+        form.post("/cart", {
             preserveScroll: true,
             onSuccess: () => setOptionsOpen(false),
         });
     };
 
+    const addToCart = () => {
+        if (hasOptions) {
+            setOptionsOpen(true);
+            return;
+        }
+        router.post(
+            "/cart",
+            { product_id: product.id, quantity: 1 },
+            { preserveScroll: true },
+        );
+    };
+
     return (
         <article
             className={cn(
-                'group overflow-hidden rounded-2xl bg-white ring-1 ring-line/70 transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_36px_-24px_rgba(18,50,58,0.45)] hover:ring-leaf/35',
+                "group relative flex flex-col rounded-2xl bg-white p-3 ring-1 ring-line/70 transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_30px_-18px_rgba(36,50,74,0.35)]",
                 className,
             )}
         >
+            <WishlistButton
+                productId={product.id}
+                className="absolute top-4 right-4 z-10"
+            />
+
             <Link
                 href={`/products/${product.slug}`}
-                className="relative block overflow-hidden bg-foam"
+                className="relative block overflow-hidden rounded-xl bg-mist"
             >
-                <div className="aspect-[5/6] overflow-hidden">
+                <div className="aspect-square overflow-hidden">
                     {product.image ? (
                         <img
                             src={product.image}
@@ -170,256 +189,245 @@ export function ProductCard({
                             className="h-full w-full object-cover transition duration-500 ease-out group-hover:scale-[1.04]"
                             loading="lazy"
                             onError={(e) => {
-                                e.currentTarget.style.display = 'none';
+                                e.currentTarget.style.display = "none";
                                 const fallback =
                                     e.currentTarget.nextElementSibling;
                                 if (fallback instanceof HTMLElement) {
-                                    fallback.classList.remove('hidden');
-                                    fallback.classList.add('flex');
+                                    fallback.classList.remove("hidden");
+                                    fallback.classList.add("flex");
                                 }
                             }}
                         />
                     ) : null}
                     <div
                         className={cn(
-                            'h-full w-full items-center justify-center bg-gradient-to-br from-foam via-white to-leaf/20',
-                            product.image ? 'hidden' : 'flex',
+                            "h-full w-full items-center justify-center bg-gradient-to-br from-sky/60 via-white to-blush/60",
+                            product.image ? "hidden" : "flex",
                         )}
                         aria-hidden={Boolean(product.image)}
                     />
                 </div>
 
-                {onSale && discountPercent > 0 && (
-                    <span className="absolute top-3 left-3 z-10 rounded-full bg-coral px-2.5 py-1 text-[11px] font-bold text-white shadow-sm">
-                        -{discountPercent}%
-                    </span>
-                )}
-
                 {outOfStock && (
-                    <span className="absolute inset-x-0 bottom-0 bg-ink/75 py-2 text-center text-[11px] font-semibold tracking-wide text-white uppercase">
+                    <span className="absolute inset-x-0 bottom-0 bg-ink/75 py-1.5 text-center text-[11px] font-semibold tracking-wide text-white uppercase">
                         Out of stock
                     </span>
                 )}
             </Link>
 
-            <div className="space-y-3 p-3.5 sm:p-4">
-                <div>
-                    {(product.brand || product.category?.name) && (
-                        <p className="text-[10px] tracking-[0.14em] text-ink-soft uppercase">
-                            {product.brand || product.category?.name}
-                        </p>
-                    )}
-                    <Link href={`/products/${product.slug}`}>
-                        <h3 className="mt-1 line-clamp-2 min-h-[2.5rem] text-[15px] leading-snug font-semibold text-ink transition group-hover:text-leaf-deep">
-                            {product.name}
-                        </h3>
-                    </Link>
-                    {product.age_range && (
-                        <p className="mt-1 text-xs text-ink-soft">
-                            Age: {product.age_range}
-                        </p>
-                    )}
-                </div>
+            <div className="mt-3 flex flex-1 flex-col px-1">
+                <Link href={`/products/${product.slug}`}>
+                    <h3 className="line-clamp-1 text-sm font-semibold text-ink transition group-hover:text-leaf-deep">
+                        {product.name}
+                    </h3>
+                </Link>
 
-                <div className="flex items-center justify-between gap-2 border-t border-line/70 pt-3">
-                    <div className="min-w-0">
-                        <p className="text-base font-bold text-leaf-deep">
-                            {formatBdt(product.price)}
-                        </p>
-                        {onSale && (
+                <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <p className="text-base font-bold text-ink">
+                        {formatBdt(product.price)}
+                    </p>
+                    {onSale && (
+                        <>
                             <p className="text-xs text-ink-soft line-through">
                                 {formatBdt(product.compare_at_price || 0)}
                             </p>
-                        )}
-                    </div>
-                    {hasOptions ? (
-                        <button
-                            type="button"
-                            onClick={() => setOptionsOpen(true)}
-                            disabled={outOfStock}
-                            className="shrink-0 rounded-full bg-ink px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-leaf-deep disabled:cursor-not-allowed disabled:opacity-40"
-                        >
-                            Choose
-                        </button>
-                    ) : (
-                        <button
-                            type="button"
-                            onClick={() =>
-                                router.post(
-                                    '/cart',
-                                    { product_id: product.id, quantity: 1 },
-                                    { preserveScroll: true },
-                                )
-                            }
-                            disabled={outOfStock}
-                            className="shrink-0 rounded-full bg-ink px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-leaf-deep disabled:cursor-not-allowed disabled:opacity-40"
-                        >
-                            Add
-                        </button>
+                            <span className="rounded-full bg-blush px-2 py-0.5 text-[11px] font-bold text-[#e0455b]">
+                                -{discountPercent}%
+                            </span>
+                        </>
                     )}
                 </div>
+
+                <div className="mt-2 flex min-h-6 flex-wrap gap-1.5">
+                    {sizes.slice(0, 4).map((size) => (
+                        <span
+                            key={size.id}
+                            className="rounded-full bg-mist px-2 py-0.5 text-[11px] text-ink-soft ring-1 ring-line"
+                        >
+                            {size.name}
+                        </span>
+                    ))}
+                    {sizes.length > 4 && (
+                        <span className="px-1 text-[11px] text-ink-soft">
+                            +{sizes.length - 4}
+                        </span>
+                    )}
+                </div>
+
+                <button
+                    type="button"
+                    onClick={addToCart}
+                    disabled={outOfStock}
+                    className="mt-3 inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-leaf text-sm font-semibold text-white transition hover:bg-leaf-deep disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                    <ShoppingBag className="size-4" />
+                    Add to Cart
+                </button>
             </div>
 
-            {optionsOpen && (
-                <div
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 p-4 backdrop-blur-sm"
-                    onMouseDown={(event) => {
-                        if (event.target === event.currentTarget) {
-                            setOptionsOpen(false);
-                        }
-                    }}
-                >
-                    <section
-                        role="dialog"
-                        aria-modal="true"
-                        aria-labelledby={`product-options-${product.id}`}
-                        className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl"
+            {optionsOpen &&
+                createPortal(
+                    <div
+                        className="fixed inset-0 z-100 flex items-center justify-center bg-ink/60 p-4 backdrop-blur-sm"
+                        onMouseDown={(event) => {
+                            if (event.target === event.currentTarget) {
+                                setOptionsOpen(false);
+                            }
+                        }}
                     >
-                        <div className="flex items-start justify-between gap-4">
-                            <div>
-                                <p className="text-xs tracking-[0.16em] text-leaf uppercase">
-                                    Select options
-                                </p>
-                                <h2
-                                    id={`product-options-${product.id}`}
-                                    className="mt-1 text-xl font-semibold text-ink"
+                        <section
+                            role="dialog"
+                            aria-modal="true"
+                            aria-labelledby={`product-options-${product.id}`}
+                            className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-3xl bg-white p-5 shadow-2xl sm:p-6"
+                        >
+                            <div className="flex items-start justify-between gap-4">
+                                <div>
+                                    <p className="text-xs tracking-[0.16em] text-leaf uppercase">
+                                        Select options
+                                    </p>
+                                    <h2
+                                        id={`product-options-${product.id}`}
+                                        className="mt-1 text-xl font-semibold text-ink"
+                                    >
+                                        {product.name}
+                                    </h2>
+                                </div>
+                                <button
+                                    type="button"
+                                    aria-label="Close options"
+                                    onClick={() => setOptionsOpen(false)}
+                                    className="rounded-full p-2 text-ink-soft hover:bg-mist hover:text-ink"
                                 >
-                                    {product.name}
-                                </h2>
+                                    <X className="h-5 w-5" />
+                                </button>
                             </div>
+
+                            {colors.length > 0 && (
+                                <fieldset className="mt-6">
+                                    <legend className="text-sm font-medium text-ink">
+                                        Color
+                                    </legend>
+                                    <div className="mt-3 flex flex-wrap gap-2">
+                                        {colors.map((color) => {
+                                            const available =
+                                                variants.length === 0
+                                                    ? (product.stock ?? 0) > 0
+                                                    : variants.some(
+                                                          (variant) =>
+                                                              variant.product_color_id ===
+                                                                  color.id &&
+                                                              variant.stock > 0,
+                                                      );
+
+                                            return (
+                                                <button
+                                                    key={color.id}
+                                                    type="button"
+                                                    aria-label={color.name}
+                                                    aria-pressed={
+                                                        colorId === color.id
+                                                    }
+                                                    disabled={!available}
+                                                    onClick={() =>
+                                                        chooseColor(color.id)
+                                                    }
+                                                    className={`flex items-center gap-2 rounded-full px-3 py-2 text-sm ring-1 transition disabled:cursor-not-allowed disabled:opacity-35 ${
+                                                        colorId === color.id
+                                                            ? "ring-2 ring-leaf ring-offset-2"
+                                                            : "ring-line hover:ring-leaf"
+                                                    }`}
+                                                >
+                                                    <span
+                                                        aria-hidden="true"
+                                                        className="h-4 w-4 rounded-full border border-ink/15"
+                                                        style={{
+                                                            backgroundColor:
+                                                                color.hex ||
+                                                                "#ccc",
+                                                        }}
+                                                    />
+                                                    {color.name}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </fieldset>
+                            )}
+
+                            {sizes.length > 0 && (
+                                <fieldset className="mt-6">
+                                    <legend className="text-sm font-medium text-ink">
+                                        Size
+                                    </legend>
+                                    <div className="mt-3 flex flex-wrap gap-2">
+                                        {sizes.map((size) => {
+                                            const available =
+                                                variants.some(
+                                                    (variant) =>
+                                                        variant.product_size_id ===
+                                                            size.id &&
+                                                        (colors.length === 0 ||
+                                                            variant.product_color_id ===
+                                                                colorId) &&
+                                                        variant.stock > 0,
+                                                ) ||
+                                                (variants.length === 0 &&
+                                                    (product.stock ?? 0) > 0);
+
+                                            return (
+                                                <button
+                                                    key={size.id}
+                                                    type="button"
+                                                    disabled={!available}
+                                                    aria-pressed={
+                                                        sizeId === size.id
+                                                    }
+                                                    onClick={() =>
+                                                        chooseSize(size.id)
+                                                    }
+                                                    className={`rounded-full px-4 py-2 text-sm ring-1 transition disabled:cursor-not-allowed disabled:opacity-35 ${
+                                                        sizeId === size.id
+                                                            ? "bg-ink text-white ring-ink"
+                                                            : "text-ink ring-line hover:ring-leaf"
+                                                    }`}
+                                                >
+                                                    {size.name}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </fieldset>
+                            )}
+
+                            {form.errors.product_color_id && (
+                                <p className="mt-3 text-sm text-coral">
+                                    {form.errors.product_color_id}
+                                </p>
+                            )}
+                            {form.errors.product_size_id && (
+                                <p className="mt-3 text-sm text-coral">
+                                    {form.errors.product_size_id}
+                                </p>
+                            )}
+
                             <button
                                 type="button"
-                                aria-label="Close options"
-                                onClick={() => setOptionsOpen(false)}
-                                className="rounded-full p-2 text-ink-soft hover:bg-mist hover:text-ink"
+                                onClick={addSelectedVariant}
+                                disabled={
+                                    form.processing ||
+                                    (variants.length > 0 &&
+                                        (!selectedVariant ||
+                                            selectedVariant.stock < 1))
+                                }
+                                className="mt-7 w-full rounded-full bg-coral py-3 text-sm font-semibold text-white transition hover:bg-coral-deep disabled:cursor-not-allowed disabled:opacity-45"
                             >
-                                <X className="h-5 w-5" />
+                                {form.processing ? "Adding..." : "Add to cart"}
                             </button>
-                        </div>
-
-                        {colors.length > 0 && (
-                            <fieldset className="mt-6">
-                                <legend className="text-sm font-medium text-ink">
-                                    Color
-                                </legend>
-                                <div className="mt-3 flex flex-wrap gap-2">
-                                    {colors.map((color) => {
-                                        const available =
-                                            variants.length === 0
-                                                ? (product.stock ?? 0) > 0
-                                                : variants.some(
-                                                      (variant) =>
-                                                          variant.product_color_id ===
-                                                              color.id &&
-                                                          variant.stock > 0,
-                                                  );
-
-                                        return (
-                                            <button
-                                                key={color.id}
-                                                type="button"
-                                                aria-label={color.name}
-                                                aria-pressed={
-                                                    colorId === color.id
-                                                }
-                                                disabled={!available}
-                                                onClick={() =>
-                                                    chooseColor(color.id)
-                                                }
-                                                className={`flex items-center gap-2 rounded-full px-3 py-2 text-sm ring-1 transition disabled:cursor-not-allowed disabled:opacity-35 ${
-                                                    colorId === color.id
-                                                        ? 'ring-2 ring-leaf ring-offset-2'
-                                                        : 'ring-line hover:ring-leaf'
-                                                }`}
-                                            >
-                                                <span
-                                                    aria-hidden="true"
-                                                    className="h-4 w-4 rounded-full border border-ink/15"
-                                                    style={{
-                                                        backgroundColor:
-                                                            color.hex || '#ccc',
-                                                    }}
-                                                />
-                                                {color.name}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </fieldset>
-                        )}
-
-                        {sizes.length > 0 && (
-                            <fieldset className="mt-6">
-                                <legend className="text-sm font-medium text-ink">
-                                    Size
-                                </legend>
-                                <div className="mt-3 flex flex-wrap gap-2">
-                                    {sizes.map((size) => {
-                                        const available =
-                                            variants.some(
-                                                (variant) =>
-                                                    variant.product_size_id ===
-                                                        size.id &&
-                                                    (colors.length === 0 ||
-                                                        variant.product_color_id ===
-                                                            colorId) &&
-                                                    variant.stock > 0,
-                                            ) ||
-                                            (variants.length === 0 &&
-                                                (product.stock ?? 0) > 0);
-
-                                        return (
-                                            <button
-                                                key={size.id}
-                                                type="button"
-                                                disabled={!available}
-                                                aria-pressed={
-                                                    sizeId === size.id
-                                                }
-                                                onClick={() =>
-                                                    chooseSize(size.id)
-                                                }
-                                                className={`rounded-full px-4 py-2 text-sm ring-1 transition disabled:cursor-not-allowed disabled:opacity-35 ${
-                                                    sizeId === size.id
-                                                        ? 'bg-ink text-white ring-ink'
-                                                        : 'text-ink ring-line hover:ring-leaf'
-                                                }`}
-                                            >
-                                                {size.name}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </fieldset>
-                        )}
-
-                        {form.errors.product_color_id && (
-                            <p className="mt-3 text-sm text-coral">
-                                {form.errors.product_color_id}
-                            </p>
-                        )}
-                        {form.errors.product_size_id && (
-                            <p className="mt-3 text-sm text-coral">
-                                {form.errors.product_size_id}
-                            </p>
-                        )}
-
-                        <button
-                            type="button"
-                            onClick={addSelectedVariant}
-                            disabled={
-                                form.processing ||
-                                (variants.length > 0 &&
-                                    (!selectedVariant ||
-                                        selectedVariant.stock < 1))
-                            }
-                            className="mt-7 w-full rounded-full bg-coral py-3 text-sm font-semibold text-white transition hover:bg-coral-deep disabled:cursor-not-allowed disabled:opacity-45"
-                        >
-                            {form.processing ? 'Adding...' : 'Add to cart'}
-                        </button>
-                    </section>
-                </div>
-            )}
+                        </section>
+                    </div>,
+                    document.body,
+                )}
         </article>
     );
 }

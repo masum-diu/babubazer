@@ -252,7 +252,7 @@ export default function ProductShow({
                                             .join(' · ')}
                                     </p>
                                 )}
-                                <h1 className="mt-3 font-display text-4xl leading-tight text-ink sm:text-5xl">
+                                <h1 className="mt-3 font-display text-3xl leading-tight text-ink sm:text-4xl lg:text-5xl">
                                     {product.name}
                                 </h1>
                                 {product.category && (
@@ -266,7 +266,7 @@ export default function ProductShow({
                             </div>
 
                             <div className="flex flex-wrap items-end gap-x-4 gap-y-2 border-y border-line/80 py-5">
-                                <p className="font-display text-4xl text-leaf-deep sm:text-5xl">
+                                <p className="font-display text-3xl text-leaf-deep sm:text-4xl lg:text-5xl">
                                     {formatBdt(product.price)}
                                 </p>
                                 {onSale && (

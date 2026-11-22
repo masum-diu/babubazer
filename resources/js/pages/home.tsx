@@ -1,15 +1,23 @@
 import { Head, Link } from '@inertiajs/react';
-import { Banknote, ShieldCheck, Truck } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import {
+    ArrowRight,
+    Banknote,
+    ChevronLeft,
+    ChevronRight,
+    ShieldCheck,
+    Truck,
+} from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { ProductCard, type ProductCardData } from '@/components/ProductCard';
 import StoreLayout from '@/layouts/StoreLayout';
 
 const promiseIcons = [Truck, Banknote, ShieldCheck];
 const promiseAccents = [
-    'bg-leaf/12 text-leaf-deep',
-    'bg-coral/12 text-coral-deep',
-    'bg-sun/25 text-ink',
+    'bg-sky text-ink',
+    'bg-blush text-ink',
+    'bg-sun/40 text-ink',
 ];
+const categoryTints = ['bg-sky', 'bg-blush', 'bg-sun/35'];
 
 type Category = {
     id: number;
@@ -38,12 +46,18 @@ export default function Home({
     featured,
     bannerSlides,
 }: {
-    content: HomeContent;
+    content: HomeContent; 
     categories: Category[];
     featured: ProductCardData[];
     bannerSlides: BannerSlide[];
 }) {
     const slides = bannerSlides;
+    const railRef = useRef<HTMLDivElement>(null);
+    const scrollRail = (dir: number) =>
+        railRef.current?.scrollBy({
+            left: dir * (railRef.current.clientWidth * 0.8),
+            behavior: 'smooth',
+        });
     const [activeSlide, setActiveSlide] = useState(0);
 
     useEffect(() => {
@@ -74,7 +88,7 @@ export default function Home({
             <Head title="Home" />
 
             <section
-                className="relative overflow-hidden"
+                className="relative mx-4 mt-4 overflow-hidden rounded-2xl sm:mx-6 sm:mt-6 lg:mx-0"
                 aria-label="Featured banners"
                 aria-roledescription="carousel"
             >
@@ -93,34 +107,31 @@ export default function Home({
                             alt=""
                             className="h-full w-full object-cover"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-r from-ink/85 via-ink/55 to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
                     </div>
                 ))}
 
                 <div
-                    className="relative mx-auto flex min-h-[78vh] max-w-7xl items-end px-4 py-16 sm:px-6 lg:px-8"
+                    className="relative flex aspect-[4/5] items-end justify-center px-5 pb-14 text-center sm:aspect-[16/9] sm:pb-16 lg:aspect-[2.3/1]"
                     aria-live="polite"
                 >
-                    <div className="max-w-xl text-white">
-                        <p className="font-display text-5xl leading-none tracking-tight sm:text-6xl md:text-7xl">
+                    <div className="max-w-3xl text-white [text-shadow:0_2px_14px_rgba(0,0,0,0.45)]">
+                        <h1 className="font-display text-3xl leading-tight font-semibold tracking-tight sm:text-5xl lg:text-6xl">
                             {slides[activeSlide].brand}
-                        </p>
-                        <h1 className="mt-5 text-2xl leading-snug font-medium sm:text-3xl">
-                            {slides[activeSlide].title}
                         </h1>
-                        <p className="mt-4 max-w-md text-base text-white/80">
-                            {slides[activeSlide].text}
+                        <p className="mt-2 text-sm font-medium sm:text-xl lg:text-2xl">
+                            {slides[activeSlide].title}
                         </p>
-                        <div className="mt-8 flex flex-wrap gap-3">
+                        <div className="mt-4 flex flex-wrap items-center justify-center gap-3 sm:mt-5">
                             <Link
                                 href={slides[activeSlide].primary_url}
-                                className="rounded-full bg-coral px-6 py-3 text-sm font-semibold text-white transition hover:bg-coral-deep"
+                                className="inline-block bg-black px-6 py-3 text-xs font-bold tracking-[0.2em] text-white uppercase transition [text-shadow:none] hover:bg-black/80 sm:px-9"
                             >
                                 {slides[activeSlide].primary}
                             </Link>
                             <Link
                                 href={slides[activeSlide].secondary_url}
-                                className="rounded-full border border-white/40 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20"
+                                className="inline-block border border-white bg-white/10 px-6 py-3 text-xs font-bold tracking-[0.2em] text-white uppercase backdrop-blur-sm transition [text-shadow:none] hover:bg-white hover:text-black sm:px-9"
                             >
                                 {slides[activeSlide].secondary}
                             </Link>
@@ -129,9 +140,9 @@ export default function Home({
                 </div>
 
                 {slides.length > 1 && (
-                    <div className="absolute right-4 bottom-6 left-4 z-10 mx-auto flex max-w-7xl justify-center sm:right-6 sm:left-6 lg:right-8 lg:left-8">
+                    <>
                         <div
-                            className="flex items-center gap-2"
+                            className="absolute inset-x-0 bottom-3 z-10 flex items-center justify-center gap-2"
                             aria-label="Choose banner"
                         >
                             {slides.map((slide, index) => (
@@ -153,7 +164,7 @@ export default function Home({
                                 />
                             ))}
                         </div>
-                    </div>
+                    </>
                 )}
             </section>
 
@@ -174,62 +185,82 @@ export default function Home({
                         View all →
                     </Link>
                 </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                    {categories.map((category) => (
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+                    {categories.map((category, index) => (
                         <Link
                             key={category.id}
                             href={`/shop?category=${category.slug}`}
-                            className="group relative min-h-44 overflow-hidden rounded-[1.75rem]"
+                            className={`group flex flex-col overflow-hidden rounded-3xl p-3 transition hover:-translate-y-1 hover:shadow-lg ${categoryTints[index % categoryTints.length]}`}
                         >
-                            {category.image && (
-                                <img
-                                    src={category.image}
-                                    alt={category.name}
-                                    className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                                />
-                            )}
-                            <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/25 to-transparent" />
-                            <div className="relative flex h-full flex-col justify-end p-5 text-white">
-                                <h3 className="font-display text-2xl">
-                                    {category.name}
-                                </h3>
-                                <p className="mt-1 text-sm text-white/75">
-                                    {category.description}
-                                </p>
+                            <div className="aspect-square overflow-hidden rounded-2xl bg-white/50">
+                                {category.image && (
+                                    <img
+                                        src={category.image}
+                                        alt={category.name}
+                                        className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                                    />
+                                )}
                             </div>
+                            <span className="mt-3 rounded-full bg-white/70 px-3 py-1.5 text-center text-sm font-semibold text-ink">
+                                {category.name}
+                            </span>
                         </Link>
                     ))}
                 </div>
             </section>
 
             <section className="mx-auto max-w-7xl px-4 pb-14 sm:px-6 lg:px-8">
-                <div className="mb-8 flex items-end justify-between gap-4">
+                <div className="mb-6 flex items-center justify-between gap-4">
                     <div>
-                        <p className="text-sm tracking-[0.2em] text-coral uppercase">
+                        <p className="text-xs tracking-[0.2em] text-leaf-deep uppercase">
                             {content.featured_eyebrow}
                         </p>
-                        <h2 className="mt-2 font-display text-3xl">
+                        <h2 className="mt-1 font-display text-2xl font-semibold text-ink">
                             {content.featured_title}
                         </h2>
                     </div>
-                    <Link
-                        href="/shop"
-                        className="ml-auto text-sm font-medium text-leaf-deep"
-                    >
-                        View all →
-                    </Link>
+                    <div className="flex items-center gap-2">
+                        <Link
+                            href="/shop"
+                            className="inline-flex h-9 items-center gap-1.5 rounded-full bg-sky px-4 text-sm font-semibold text-ink transition hover:bg-sky-deep"
+                        >
+                            View All
+                            <ArrowRight className="size-3.5" />
+                        </Link>
+                        <button
+                            type="button"
+                            aria-label="Scroll left"
+                            onClick={() => scrollRail(-1)}
+                            className="hidden size-9 items-center justify-center rounded-full bg-white ring-1 ring-line transition hover:ring-leaf sm:inline-flex"
+                        >
+                            <ChevronLeft className="size-4" />
+                        </button>
+                        <button
+                            type="button"
+                            aria-label="Scroll right"
+                            onClick={() => scrollRail(1)}
+                            className="hidden size-9 items-center justify-center rounded-full bg-white ring-1 ring-line transition hover:ring-leaf sm:inline-flex"
+                        >
+                            <ChevronRight className="size-4" />
+                        </button>
+                    </div>
                 </div>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div
+                    ref={railRef}
+                    className="-mx-1 flex snap-x snap-mandatory gap-4 overflow-x-auto px-1 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                >
                     {featured.map((product) => (
-                        <ProductCard key={product.id} product={product} />
+                        <ProductCard
+                            key={product.id}
+                            product={product}
+                            className="w-[46%] shrink-0 snap-start sm:w-[31%] lg:w-[23.5%]"
+                        />
                     ))}
                 </div>
             </section>
 
             <section className="relative overflow-hidden border-y border-line/70">
-                <div className="absolute inset-0 bg-gradient-to-br from-foam via-white/80 to-mist" />
-                <div className="absolute -top-16 right-0 h-48 w-48 rounded-full bg-sun/20 blur-3xl" />
-                <div className="absolute -bottom-20 left-10 h-52 w-52 rounded-full bg-leaf/15 blur-3xl" />
+                <div className="absolute inset-0 bg-gradient-to-br from-sky/40 via-mist to-blush/50" />
 
                 <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
                     <div className="mb-10 max-w-xl">

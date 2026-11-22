@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Category;
 use App\Models\SitePage;
 use App\Services\CartService;
 use Illuminate\Http\Request;
@@ -35,8 +36,26 @@ class HandleInertiaRequests extends Middleware
                     : null,
             ],
             'cartCount' => $cart->count($request),
+            'wishlistIds' => fn () => $request->user()
+                ? $request->user()->wishlist()->pluck('products.id')->all()
+                : [],
             'navbar' => fn () => SitePage::content('navbar'),
             'footer' => fn () => SitePage::content('footer'),
+            'sidebarCategories' => fn () => $request->is('admin*')
+                ? []
+                : Category::query()
+                    ->whereNull('parent_id')
+                    ->where('is_active', true)
+                    ->with([
+                        'children' => fn ($q) => $q
+                            ->where('is_active', true)
+                            ->orderByDesc('sort_order')
+                            ->orderByDesc('id')
+                            ->select(['id', 'name', 'slug', 'parent_id']),
+                    ])
+                    ->orderByDesc('sort_order')
+                    ->orderByDesc('id')
+                    ->get(['id', 'name', 'slug']),
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
