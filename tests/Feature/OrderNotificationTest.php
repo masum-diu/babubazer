@@ -15,6 +15,14 @@ class OrderNotificationTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // the real address comes from ORDER_NOTIFICATION_EMAIL in .env
+        config(['shop.order_notification_email' => 'owner@example.com']);
+    }
+
     private function product(): Product
     {
         $category = Category::create(['name' => 'Toys', 'slug' => 'toys']);
@@ -64,7 +72,7 @@ class OrderNotificationTest extends TestCase
 
         $order = Order::firstOrFail();
         Mail::assertSent(NewOrderMail::class, function (NewOrderMail $mail) use ($order) {
-            return $mail->hasTo('nashitaiftekhar@gmail.com')
+            return $mail->hasTo('owner@example.com')
                 && $mail->order->is($order)
                 && str_contains($mail->envelope()->subject, $order->order_number)
                 && $mail->hasReplyTo('nusrat@example.com');
@@ -78,7 +86,7 @@ class OrderNotificationTest extends TestCase
 
         $this->placeOrder(asGuest: true);
 
-        Mail::assertSent(NewOrderMail::class, fn ($mail) => $mail->hasTo('nashitaiftekhar@gmail.com'));
+        Mail::assertSent(NewOrderMail::class, fn ($mail) => $mail->hasTo('owner@example.com'));
     }
 
     public function test_several_recipients_can_be_configured(): void
