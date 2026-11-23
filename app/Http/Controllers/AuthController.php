@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Middleware\EnsureCustomerLoggedIn;
 use App\Models\User;
 use App\Services\CartService;
 use Illuminate\Http\RedirectResponse;
@@ -18,6 +19,21 @@ class AuthController extends Controller
     public function showLogin(): Response
     {
         return Inertia::render('auth/login');
+    }
+
+    public function continueAsGuest(Request $request): RedirectResponse
+    {
+        $request->session()->put(EnsureCustomerLoggedIn::GUEST_SESSION_KEY, true);
+
+        return redirect()->intended(route('home'))
+            ->with('success', 'You are shopping as a guest. Create an account anytime to save your wishlist and track orders.');
+    }
+
+    public function leaveGuest(Request $request): RedirectResponse
+    {
+        $request->session()->forget(EnsureCustomerLoggedIn::GUEST_SESSION_KEY);
+
+        return redirect()->route('home')->with('success', 'Guest session ended.');
     }
 
     public function showAdminLogin(Request $request): Response|RedirectResponse
@@ -105,7 +121,7 @@ class AuthController extends Controller
         $request->session()->regenerate();
         $this->cart->mergeSessionCart($request);
 
-        return redirect()->route('home');
+        return redirect()->intended(route('home'));
     }
 
     public function logout(Request $request): RedirectResponse

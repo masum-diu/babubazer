@@ -53,6 +53,64 @@ class AdminSalesReportTest extends TestCase
             );
     }
 
+    public function test_days_follow_bangladesh_time_not_utc(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        // Stored in UTC. 17:59 UTC = 23:59 on the 5th in Dhaka, 18:00 UTC = 00:00 on the 6th.
+        $this->createSale('confirmed', '2026-11-05 17:59:00', 100, 'Late on 5th', 1);
+        $this->createSale('confirmed', '2026-11-05 18:00:00', 200, 'Early on 6th', 1);
+        $this->createSale('delivered', '2026-11-06 03:00:00', 300, 'Morning on 6th', 1);
+
+        $this->actingAs($admin)
+            ->get('/admin/reports/sales?from=2026-11-06&to=2026-11-06')
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('summary.orders', 2)
+                ->where('summary.revenue', 500)
+                ->has('dailySales', 1)
+                ->where('dailySales.0.date', '2026-11-06')
+                ->where('dailySales.0.orders_count', 2)
+                ->where('dailySales.0.revenue', 500));
+
+        $this->actingAs($admin)
+            ->get('/admin/reports/sales?from=2026-11-05&to=2026-11-05')
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('summary.orders', 1)
+                ->where('summary.revenue', 100)
+                ->where('dailySales.0.date', '2026-11-05'));
+
+        $csv = $this->actingAs($admin)
+            ->get('/admin/reports/sales/export?from=2026-11-06&to=2026-11-06')
+            ->streamedContent();
+        $this->assertStringContainsString('2026-11-06,TEST-', $csv);
+        $this->assertStringNotContainsString('2026-11-05,TEST-', $csv);
+    }
+
+    public function test_default_range_ends_on_todays_bangladesh_date(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        // 20:00 UTC on the 10th is already 02:00 on the 11th in Dhaka.
+        $this->travelTo(Carbon::parse('2026-11-10 20:00:00', 'UTC'));
+
+        $this->actingAs($admin)
+            ->get('/admin/reports/sales')
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('filters.from', '2026-11-01')
+                ->where('filters.to', '2026-11-11'));
+    }
+
+    public function test_delivery_charge_is_part_of_order_total_revenue(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $order = $this->createSale('confirmed', '2026-11-05 10:00:00', 1000, 'Blanket', 2);
+        $order->update(['subtotal' => 920, 'shipping_fee' => 80, 'total' => 1000]);
+
+        $this->actingAs($admin)
+            ->get('/admin/reports/sales?from=2026-11-01&to=2026-11-30')
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('summary.revenue', 1000)
+                ->where('summary.average_order', 1000));
+    }
+
     public function test_guest_cannot_access_sales_report(): void
     {
         $this->get('/admin/reports/sales')->assertRedirect('/admin');

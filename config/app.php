@@ -68,6 +68,13 @@ return [
     'timezone' => 'UTC',
 
     /*
+    | Timezone the shop operates in. Dates are stored in UTC (above); sales reports and
+    | order date filters use this one so a "day" matches the shop's calendar day.
+    */
+
+    'business_timezone' => env('BUSINESS_TIMEZONE', 'Asia/Dhaka'),
+
+    /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration
     |--------------------------------------------------------------------------

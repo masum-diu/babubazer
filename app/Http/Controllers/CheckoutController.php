@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\NewOrderMail;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Services\CartService;
@@ -11,6 +12,7 @@ use App\Support\ShippingFee;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -60,7 +62,7 @@ class CheckoutController extends Controller
                     }
                 },
             ],
-            'payment_method' => ['required', Rule::in(['cod', 'bkash', 'nagad'])],
+            'payment_method' => ['required', Rule::in(['cod'])],
             'notes' => ['nullable', 'string', 'max:500'],
         ]);
 
@@ -138,21 +140,61 @@ class CheckoutController extends Controller
 
         $request->session()->put('placed_order_id', $order->id);
 
-        return redirect()->route('orders.show', $order)->with('success', 'Order placed successfully');
+        $this->notifyShopOwner($order);
+
+        return redirect()->route('orders.confirmed', $order);
     }
 
-    public function show(Request $request, Order $order): Response
+    /**
+     * Email the shop owner about a new order. Sent after the response so the customer is
+     * never kept waiting, and a mail problem can never undo or break the order itself.
+     */
+    private function notifyShopOwner(Order $order): void
+    {
+        $recipients = array_values(array_filter(array_map(
+            'trim',
+            explode(',', (string) config('shop.order_notification_email')),
+        )));
+
+        if ($recipients === []) {
+            return;
+        }
+
+        app()->terminating(function () use ($order, $recipients) {
+            try {
+                Mail::to($recipients)->send(new NewOrderMail($order->fresh('items')));
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        });
+    }
+
+    private function canView(Request $request, Order $order): bool
     {
         $user = $request->user();
-        $allowed = ($user && ($user->is_admin || $order->user_id === $user->id))
+
+        return ($user && ($user->is_admin || $order->user_id === $user->id))
             || $request->session()->get('placed_order_id') === $order->id;
+    }
 
-        abort_unless($allowed, 403);
+    /** The short "thank you" page shown right after an order is placed. */
+    public function confirmed(Request $request, Order $order): Response
+    {
+        abort_unless($this->canView($request, $order), 403);
 
-        $order->load('items');
-
-        return Inertia::render('orders/show', [
-            'order' => $order,
+        return Inertia::render('orders/confirmed', [
+            'orderNumber' => $order->order_number,
+            'firstName' => explode(' ', trim($order->customer_name))[0] ?? '',
         ]);
+    }
+
+    /** Old order-details link: the tracking page now shows everything (signed-in owner only). */
+    public function show(Request $request, Order $order): RedirectResponse
+    {
+        $user = $request->user();
+
+        abort_unless($user && ($user->is_admin || $order->user_id === $user->id), 403);
+
+        return redirect()->route('track.show', $order->order_number);
     }
 }

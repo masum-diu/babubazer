@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductColor;
 use App\Models\ProductVariant;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
@@ -67,6 +68,8 @@ class CartVariantTest extends TestCase
             'name' => 'Blue',
         ]);
 
+        $this->actingAs(User::factory()->create());
+
         $this->from('/shop')
             ->post('/cart', [
                 'product_id' => $product->id,
@@ -99,6 +102,8 @@ class CartVariantTest extends TestCase
             'product_color_id' => $color->id,
             'stock' => 2,
         ]);
+
+        $this->actingAs(User::factory()->create());
 
         $this->post('/cart', [
             'product_id' => $product->id,

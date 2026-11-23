@@ -13,7 +13,6 @@ type Cart = {
         product: { name: string };
     }>;
     subtotal: number;
-    shipping_fee: number;
     total: number;
 };
 
@@ -23,7 +22,7 @@ export default function Checkout({
     cart,
     user,
     divisionTree = {},
-    shippingRates = { dhaka: 60, outside: 120 },
+    shippingRates = { dhaka: 80, outside: 120 },
 }: {
     cart: Cart;
     user: { name: string; email: string; phone?: string | null } | null;
@@ -226,41 +225,27 @@ export default function Checkout({
                             )}
                         </div>
 
-                        <fieldset>
-                            <legend className="mb-2 text-sm font-medium text-ink">
+                        <div>
+                            <p className="mb-2 text-sm font-medium text-ink">
                                 Payment method
-                            </legend>
-                            <div className="space-y-2">
-                                {[
-                                    ['cod', 'Cash on delivery'],
-                                    ['bkash', 'bKash'],
-                                    ['nagad', 'Nagad'],
-                                ].map(([value, label]) => (
-                                    <label
-                                        key={value}
-                                        className="flex cursor-pointer items-center gap-3 rounded-2xl border border-line px-4 py-3 text-sm"
-                                    >
-                                        <input
-                                            type="radio"
-                                            name="payment_method"
-                                            value={value}
-                                            checked={
-                                                form.data.payment_method ===
-                                                value
-                                            }
-                                            onChange={() =>
-                                                form.setData(
-                                                    'payment_method',
-                                                    value,
-                                                )
-                                            }
-                                            className="accent-leaf"
-                                        />
-                                        {label}
-                                    </label>
-                                ))}
+                            </p>
+                            <div className="flex items-start gap-3 rounded-2xl border border-leaf bg-leaf/5 px-4 py-3 text-sm">
+                                <span
+                                    className="mt-1 inline-flex size-4 shrink-0 items-center justify-center rounded-full border-2 border-leaf"
+                                    aria-hidden="true"
+                                >
+                                    <span className="size-2 rounded-full bg-leaf" />
+                                </span>
+                                <span>
+                                    <span className="block font-medium text-ink">
+                                        Cash on delivery
+                                    </span>
+                                    <span className="block text-xs text-ink-soft">
+                                        Pay in cash when your order arrives.
+                                    </span>
+                                </span>
                             </div>
-                        </fieldset>
+                        </div>
 
                         <textarea
                             rows={2}

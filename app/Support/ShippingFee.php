@@ -4,7 +4,7 @@ namespace App\Support;
 
 class ShippingFee
 {
-    public const DHAKA = 60.0;
+    public const DHAKA = 80.0;
 
     public const OUTSIDE_DHAKA = 120.0;
 

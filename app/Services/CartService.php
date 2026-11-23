@@ -209,18 +209,12 @@ class CartService
         })->values();
 
         $subtotal = (float) $lines->sum('line_total');
-        // Cart estimate uses Dhaka rate; checkout recalculates by division.
-        $shipping = $subtotal === 0.0
-            ? 0.0
-            : \App\Support\ShippingFee::forDivision('Dhaka');
-
+        // Delivery charge is not part of the cart; it is added at checkout by division.
         return [
             'items' => $lines,
             'count' => $lines->sum('quantity'),
             'subtotal' => $subtotal,
-            'shipping_fee' => $shipping,
-            'total' => $subtotal + $shipping,
-            'shipping_rates' => \App\Support\ShippingFee::rates(),
+            'total' => $subtotal,
         ];
     }
 

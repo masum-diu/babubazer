@@ -11,7 +11,6 @@ import {
     Search,
     ShieldCheck,
     ShoppingBag,
-    Star,
     Truck,
     User,
     X,
@@ -47,6 +46,7 @@ type Shared = {
     };
     sidebarCategories?: SidebarCategory[];
     wishlistIds?: number[];
+    guest?: boolean;
     footer?: {
         logo?: string;
         blurb?: string;
@@ -61,6 +61,32 @@ type Shared = {
         newsletter_text?: string;
     };
 };
+
+const FALLBACK_LOGO = '/logo-horizontal.png';
+
+/** Shows the admin-uploaded logo as-is; the bundled logo is only a fallback. */
+function BrandLogo({
+    src,
+    alt,
+    className,
+}: {
+    src?: string | null;
+    alt: string;
+    className?: string;
+}) {
+    const [broken, setBroken] = useState(false);
+    const current = !src || broken ? FALLBACK_LOGO : src;
+
+    return (
+        <img
+            key={current}
+            src={current}
+            alt={alt}
+            className={className}
+            onError={() => setBroken(true)}
+        />
+    );
+}
 
 const iconBtn =
     'relative inline-flex size-10 items-center justify-center rounded-full text-ink transition hover:bg-white/70';
@@ -122,12 +148,14 @@ export default function StoreLayout({ children }: PropsWithChildren) {
         topbar,
         sidebarCategories,
         wishlistIds = [],
+        guest: isGuest = false,
     } = usePage().props as unknown as Shared;
     const { url } = usePage();
     const name = navbar?.brand_name || appName;
     const [menuOpen, setMenuOpen] = useState(false);
     const searchForm = useForm({ q: '' });
     const logout = useForm({});
+    const leaveGuest = useForm({});
 
     const path = url.split('?')[0];
     const query = new URLSearchParams(url.split('?')[1] ?? '');
@@ -259,7 +287,7 @@ export default function StoreLayout({ children }: PropsWithChildren) {
 
             {/* Main navbar */}
             <header className="sticky top-0 z-40 border-b border-line bg-mist">
-                <div className="mx-auto flex h-16 max-w-[1600px] items-center gap-3 px-4 sm:px-6 lg:gap-6 lg:px-8">
+                <div className="mx-auto flex h-22 max-w-[1600px] items-center gap-3 px-4 sm:px-6 lg:gap-6 lg:px-8">
                     <button
                         type="button"
                         aria-label="Menu"
@@ -274,22 +302,11 @@ export default function StoreLayout({ children }: PropsWithChildren) {
                     </button>
 
                     <Link href="/" className="group shrink-0">
-                        {navbar?.logo ? (
-                            <img
-                                src={navbar.logo}
-                                alt={name}
-                                className="h-14 w-auto max-w-65 object-contain"
-                            />
-                        ) : (
-                            <>
-                                <span className="block font-display text-2xl leading-none font-semibold text-leaf transition group-hover:text-leaf-deep">
-                                    {name}
-                                </span>
-                                <span className="text-[10px] tracking-[0.18em] text-ink-soft uppercase">
-                                    {navbar?.tagline ?? 'Baby essentials'}
-                                </span>
-                            </>
-                        )}
+                        <BrandLogo
+                            src={navbar?.logo}
+                            alt={name}
+                            className="h-18 w-auto max-w-80 rounded-xl object-contain"
+                        />
                     </Link>
 
                     <nav className="ml-2 hidden items-center gap-0.5 lg:flex">
@@ -430,6 +447,54 @@ export default function StoreLayout({ children }: PropsWithChildren) {
                                     <LogOut className="size-5" />
                                 </button>
                             </>
+                        ) : isGuest ? (
+                            <div className="group relative">
+                                <button
+                                    type="button"
+                                    className="inline-flex h-10 items-center gap-1.5 rounded-full px-2.5 text-sm font-medium text-ink transition hover:bg-white/70"
+                                >
+                                    <User className="size-5" />
+                                    <span className="hidden xl:inline">
+                                        Guest
+                                    </span>
+                                    <ChevronDown className="hidden size-3.5 xl:block" />
+                                </button>
+                                <div className="invisible absolute top-full right-0 z-50 pt-2 opacity-0 transition group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
+                                    <div className="w-64 rounded-2xl bg-white p-3 shadow-[0_18px_40px_-18px_rgba(36,50,74,0.4)] ring-1 ring-line">
+                                        <div className="flex items-center gap-3 border-b border-line pb-3">
+                                            <span className="inline-flex size-10 items-center justify-center rounded-full bg-sky text-ink">
+                                                <User className="size-5" />
+                                            </span>
+                                            <div>
+                                                <p className="text-sm font-semibold text-ink">
+                                                    Guest
+                                                </p>
+                                                <p className="text-xs text-ink-soft">
+                                                    Shopping without an account
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <p className="mt-3 px-1 text-xs leading-relaxed text-ink-soft">
+                                            Add items to your bag and fill in
+                                            your details at checkout to place
+                                            your order.
+                                        </p>
+                                        <div className="mt-2 space-y-0.5">
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    leaveGuest.post(
+                                                        '/guest/leave',
+                                                    )
+                                                }
+                                                className="block w-full rounded-xl px-3 py-2 text-left text-sm text-ink-soft transition hover:bg-mist hover:text-ink"
+                                            >
+                                                End guest session
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         ) : (
                             <Link
                                 href="/login"
@@ -553,6 +618,25 @@ export default function StoreLayout({ children }: PropsWithChildren) {
                                     Logout
                                 </button>
                             </>
+                        ) : isGuest ? (
+                            <div className="mt-2 border-t border-line pt-2">
+                                <p className="px-3 py-1 text-[11px] font-semibold tracking-[0.16em] text-ink-soft uppercase">
+                                    Shopping as guest
+                                </p>
+                                <p className="px-3 pb-1 text-xs leading-relaxed text-ink-soft">
+                                    Fill in your details at checkout to place
+                                    your order.
+                                </p>
+                                <button
+                                    type="button"
+                                    className="block w-full rounded-xl px-3 py-2.5 text-left text-ink-soft"
+                                    onClick={() =>
+                                        leaveGuest.post('/guest/leave')
+                                    }
+                                >
+                                    End guest session
+                                </button>
+                            </div>
                         ) : (
                             <Link
                                 href="/login"
@@ -582,24 +666,13 @@ export default function StoreLayout({ children }: PropsWithChildren) {
                     <path d="M0 48V26C160 4 320 0 480 14s320 30 480 18 320-26 480-10v26z" />
                 </svg>
 
-                <Star className="absolute top-6 left-3 size-5 text-sun" />
-                <Star className="absolute top-8 right-4 size-6 text-sun" />
-                <Star className="absolute bottom-6 left-6 size-5 text-sun" />
-                <Star className="absolute right-6 bottom-8 size-5 text-sun" />
-
                 <div className="relative mx-auto grid max-w-7xl gap-10 px-4 pt-8 pb-8 sm:px-6 md:grid-cols-2 lg:grid-cols-[1.1fr_0.9fr_1.1fr_1.2fr] lg:gap-0 lg:px-8">
                     <div className="lg:pr-8">
-                        {footer?.logo ? (
-                            <img
-                                src={footer.logo}
-                                alt={name}
-                                className="h-16 w-auto max-w-55 object-contain"
-                            />
-                        ) : (
-                            <p className="font-display text-3xl font-semibold text-leaf">
-                                {name}
-                            </p>
-                        )}
+                        <BrandLogo
+                            src={footer?.logo || navbar?.logo}
+                            alt={name}
+                            className="h-24 w-auto max-w-80 rounded-2xl object-contain"
+                        />
                         <p className="mt-3 text-sm font-semibold">
                             {footer?.tagline || footer?.blurb}
                         </p>
@@ -633,6 +706,14 @@ export default function StoreLayout({ children }: PropsWithChildren) {
                             >
                                 Contact Us
                             </Link>
+                            {auth.user && (
+                                <Link
+                                    href="/account/orders"
+                                    className="block hover:text-leaf-deep"
+                                >
+                                    My Orders
+                                </Link>
+                            )}
                             <Link
                                 href="/wishlist"
                                 className="block hover:text-leaf-deep"

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Support\BusinessTime;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -25,16 +26,22 @@ class SalesReportController extends Controller
             ->selectRaw('COUNT(*) as orders_count, COALESCE(SUM(total), 0) as revenue')
             ->first();
 
+        // Grouped per shop-day (Bangladesh time) rather than per UTC day.
         $dailySales = (clone $orders)
-            ->selectRaw('DATE(created_at) as date, COUNT(*) as orders_count, SUM(total) as revenue')
-            ->groupByRaw('DATE(created_at)')
-            ->orderByRaw('DATE(created_at) DESC')
-            ->get();
+            ->get(['orders.created_at', 'orders.total'])
+            ->groupBy(fn (Order $order) => BusinessTime::dateOf($order->created_at))
+            ->map(fn ($group, $date) => [
+                'date' => $date,
+                'orders_count' => $group->count(),
+                'revenue' => (float) $group->sum('total'),
+            ])
+            ->sortKeysDesc()
+            ->values();
 
         $topProducts = DB::table('order_items')
             ->join('orders', 'orders.id', '=', 'order_items.order_id')
             ->whereIn('orders.status', self::REVENUE_STATUSES)
-            ->whereBetween('orders.created_at', [$from->startOfDay(), $to->endOfDay()])
+            ->whereBetween('orders.created_at', [BusinessTime::dayStart($from), BusinessTime::dayEnd($to)])
             ->selectRaw('order_items.product_name, SUM(order_items.quantity) as quantity, SUM(order_items.line_total) as revenue')
             ->groupBy('order_items.product_name')
             ->orderByDesc('revenue')
@@ -73,7 +80,7 @@ class SalesReportController extends Controller
             $orders->with('items')->chunk(200, function ($batch) use ($output): void {
                 foreach ($batch as $order) {
                     fputcsv($output, [
-                        $order->created_at->toDateString(),
+                        BusinessTime::dateOf($order->created_at),
                         $order->order_number,
                         $order->customer_name,
                         $order->status,
@@ -99,12 +106,12 @@ class SalesReportController extends Controller
             'to' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:from'],
         ]);
 
-        $today = CarbonImmutable::today();
+        $today = BusinessTime::today();
         $from = isset($validated['from'])
-            ? CarbonImmutable::createFromFormat('Y-m-d', $validated['from'])
+            ? CarbonImmutable::createFromFormat('Y-m-d', $validated['from'], BusinessTime::timezone())
             : $today->startOfMonth();
         $to = isset($validated['to'])
-            ? CarbonImmutable::createFromFormat('Y-m-d', $validated['to'])
+            ? CarbonImmutable::createFromFormat('Y-m-d', $validated['to'], BusinessTime::timezone())
             : $today;
 
         return [$from, $to];
@@ -114,6 +121,6 @@ class SalesReportController extends Controller
     {
         return Order::query()
             ->whereIn('status', self::REVENUE_STATUSES)
-            ->whereBetween('orders.created_at', [$from->startOfDay(), $to->endOfDay()]);
+            ->whereBetween('orders.created_at', [BusinessTime::dayStart($from), BusinessTime::dayEnd($to)]);
     }
 }

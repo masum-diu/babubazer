@@ -25,7 +25,6 @@ type Cart = {
         };
     }>;
     subtotal: number;
-    shipping_fee: number;
     total: number;
 };
 
@@ -160,15 +159,6 @@ export default function CartIndex({ cart }: { cart: Cart }) {
                                 <div className="flex justify-between">
                                     <span>Subtotal</span>
                                     <span>{formatBdt(cart.subtotal)}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span>
-                                        Delivery
-                                        <span className="mt-0.5 block text-[11px] font-normal text-ink-soft">
-                                            Dhaka rate (final at checkout)
-                                        </span>
-                                    </span>
-                                    <span>{formatBdt(cart.shipping_fee)}</span>
                                 </div>
                                 <div className="flex justify-between border-t border-line pt-3 text-base font-semibold">
                                     <span>Total</span>

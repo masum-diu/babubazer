@@ -1,4 +1,4 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import { Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 import StoreLayout from '@/layouts/StoreLayout';
@@ -90,17 +90,25 @@ export default function Login() {
                             )}
                         </button>
                     </div>
-                    <label className="flex items-center gap-2 text-sm text-ink-soft">
-                        <input
-                            type="checkbox"
-                            checked={form.data.remember}
-                            onChange={(e) =>
-                                form.setData('remember', e.target.checked)
-                            }
-                            className="accent-leaf"
-                        />
-                        Remember me
-                    </label>
+                    <div className="flex items-center justify-between gap-3">
+                        <label className="flex items-center gap-2 text-sm text-ink-soft">
+                            <input
+                                type="checkbox"
+                                checked={form.data.remember}
+                                onChange={(e) =>
+                                    form.setData('remember', e.target.checked)
+                                }
+                                className="accent-leaf"
+                            />
+                            Remember me
+                        </label>
+                        <Link
+                            href="/forgot-password"
+                            className="text-sm font-medium text-leaf-deep"
+                        >
+                            Forgot password?
+                        </Link>
+                    </div>
                     <button
                         type="submit"
                         disabled={form.processing}
@@ -108,10 +116,26 @@ export default function Login() {
                     >
                         Login
                     </button>
-                    <p className="text-xs text-ink-soft">
-                        Demo: customer@babubazer.com / password
-                    </p>
                 </form>
+
+                <div className="mt-6 text-center">
+                    <div className="flex items-center gap-3 text-xs text-ink-soft">
+                        <span className="h-px flex-1 bg-line" />
+                        or
+                        <span className="h-px flex-1 bg-line" />
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => router.post('/guest')}
+                        className="mt-4 inline-flex w-full items-center justify-center rounded-full border-2 border-leaf py-2.5 text-sm font-semibold text-leaf-deep transition hover:bg-leaf hover:text-white"
+                    >
+                        Continue as guest
+                    </button>
+                    <p className="mt-2 text-[11px] text-ink-soft">
+                        Order without an account. Wishlist and order history
+                        need an account.
+                    </p>
+                </div>
             </div>
         </StoreLayout>
     );

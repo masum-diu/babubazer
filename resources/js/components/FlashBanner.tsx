@@ -1,9 +1,17 @@
 import { usePage } from '@inertiajs/react';
-import { AlertCircle, CheckCircle2, X } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Info, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
-type Flash = { success?: string | null; error?: string | null };
-type Toast = { id: number; type: 'success' | 'error'; message: string };
+type Flash = {
+    success?: string | null;
+    error?: string | null;
+    info?: string | null;
+};
+type Toast = {
+    id: number;
+    type: 'success' | 'error' | 'info';
+    message: string;
+};
 
 const DURATION = 4500;
 
@@ -23,6 +31,9 @@ export function FlashBanner() {
         }
         if (flash?.error) {
             incoming.push({ type: 'error', message: flash.error });
+        }
+        if (flash?.info) {
+            incoming.push({ type: 'info', message: flash.info });
         }
         if (incoming.length === 0) {
             return;
@@ -57,19 +68,28 @@ export function FlashBanner() {
         >
             {toasts.map((toast) => {
                 const isError = toast.type === 'error';
-                const Icon = isError ? AlertCircle : CheckCircle2;
+                const isInfo = toast.type === 'info';
+                const Icon = isError ? AlertCircle : isInfo ? Info : CheckCircle2;
 
                 return (
                     <div
                         key={toast.id}
                         role={isError ? 'alert' : 'status'}
                         className={`toast-in pointer-events-auto flex w-full items-start gap-3 rounded-2xl border bg-white px-4 py-3 shadow-[0_18px_40px_-18px_rgba(36,50,74,0.45)] ${
-                            isError ? 'border-[#e0455b]/40' : 'border-leaf/40'
+                            isError
+                                ? 'border-[#e0455b]/40'
+                                : isInfo
+                                  ? 'border-[#2f5fb3]/40'
+                                  : 'border-leaf/40'
                         }`}
                     >
                         <Icon
                             className={`mt-0.5 size-5 shrink-0 ${
-                                isError ? 'text-[#e0455b]' : 'text-leaf-deep'
+                                isError
+                                    ? 'text-[#e0455b]'
+                                    : isInfo
+                                      ? 'text-[#2f5fb3]'
+                                      : 'text-leaf-deep'
                             }`}
                         />
                         <p className="flex-1 text-sm font-medium text-ink">

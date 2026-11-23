@@ -36,6 +36,7 @@ class HandleInertiaRequests extends Middleware
                     : null,
             ],
             'cartCount' => $cart->count($request),
+            'guest' => ! $request->user() && (bool) $request->session()->get('guest_checkout'),
             'wishlistIds' => function () use ($request) {
                 if (! $request->user()) {
                     return [];
@@ -68,6 +69,7 @@ class HandleInertiaRequests extends Middleware
                     ->get(['id', 'name', 'slug']),
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
+                'info' => fn () => $request->session()->get('info'),
                 'error' => fn () => $request->session()->get('error'),
             ],
         ];

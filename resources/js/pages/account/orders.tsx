@@ -87,7 +87,7 @@ export default function AccountOrders({
                             {orders.data.map((order) => (
                                 <Link
                                     key={order.id}
-                                    href={`/orders/${order.id}`}
+                                    href={`/track-order/${order.order_number}`}
                                     className="group grid gap-3 px-5 py-5 transition hover:bg-mist/80 sm:px-6 md:grid-cols-[1.2fr_1fr_0.8fr_auto] md:items-center"
                                 >
                                     <div>

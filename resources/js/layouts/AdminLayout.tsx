@@ -71,8 +71,8 @@ const links = [
     },
     {
         href: '/admin/orders',
-        label: 'Sales',
-        hint: 'Orders',
+        label: 'Orders',
+        hint: 'Sales',
         icon: ShoppingBag,
     },
     {

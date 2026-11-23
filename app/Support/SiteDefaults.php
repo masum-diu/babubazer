@@ -69,7 +69,7 @@ class SiteDefaults
             'promise_1_title' => 'Free delivery over ৳2000',
             'promise_1_text' => 'Shipping free on larger orders',
             'promise_2_title' => 'Cash on delivery',
-            'promise_2_text' => 'bKash / Nagad / COD supported',
+            'promise_2_text' => 'Pay in cash when your order arrives',
             'promise_3_title' => 'Safe for baby',
             'promise_3_text' => 'Soft, trusted essentials only',
         ];
